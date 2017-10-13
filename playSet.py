@@ -50,11 +50,11 @@ class controls:
 
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
 		try:
-			self.logger.info('+++++ Executing command '+cmd+' +++++')
+			self.logger.info('+ Executing command '+cmd+' +')
 			result=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
 			with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
 				f.write(result)
-			self.logger.info('----- Finished executing command '+cmd+' -----')
+			self.logger.info('- Finished executing command '+cmd+' -')
 			self.addResult(result,dbname,setting,hiveql)
 		except Exception as e:
 			if hasattr(e,'returncode'):
@@ -70,33 +70,33 @@ class controls:
 			if self.modconf.putConfig(key,ambariSetting[key]):
 				reset=True
 		if reset:
-			self.logger.info('++++ Config changed. Going to restart services/components if any! ++++')
+			self.logger.info('+ Config changed. Going to restart services/components if any! +')
 			for service in services:
-				self.logger.info('+++++ Restarting '+service+' +++++')
+				self.logger.info('+ Restarting '+service+' +')
 				self.modconf.restartService(service)
-				self.logger.info('----- Restarted '+service+' -----')
+				self.logger.info('- Restarted '+service+' -')
 			for component in components:
-				self.logger.info('+++++ Restarting '+component+' +++++')
+				self.logger.info('+ Restarting '+component+' +')
 				self.modconf.restartComponent(component)
-				self.logger.info('----- Restarted '+component+' -----')
+				self.logger.info('- Restarted '+component+' -')
 
 	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=True):
 		self.hive.setJDBCUrl(dbname)
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
-				self.logger.info('+++++ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +++++\n')
+				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +\n')
 				if setting in self.hive.viaAmbari.keys():
-					self.logger.info('+++++ Modifying Config via ambari for '+setting+' +++++')
+					self.logger.info('+ Modifying Config via ambari for '+setting+' +')
 					self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
-					self.logger.info('----- Modified Config via ambari for '+setting+' -----')
+					self.logger.info('- Modified Config via ambari for '+setting+' -')
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
 				for i in xrange(numRuns):
 					self.logger.info(beelineCmd+'\n')
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
-				self.logger.info('----- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -----')
+				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
 			except Exception as e:
 				self.logger.info(e.__str__())
-				self.logger.info('----- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -----')
+				self.logger.info('- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -')
 
 
 	def addHiveSettings(self,name,runSettings):
@@ -114,10 +114,11 @@ class controls:
 			self.addHiveSettings(setting['name'],setting['config'])
 		self.numRuns=iparse.numRuns()
 		self.db=iparse.db()
+		self.queries=iparse.queries()
 
 if __name__=='__main__':
 	C=controls('localhost','DPH')
 	C.fetchParams('params.json')
-	C.runTests(C.db,C.hiveconfs,['query12.sql'],C.numRuns,False)
+	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,False)
 	C.dumpResultsToCsv(C.numRuns)
 	C.runAnalysis()

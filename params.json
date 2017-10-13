@@ -2,6 +2,7 @@
     "wrap": {
         "numRuns": 3,
         "database":"tpcds_bin_partitioned_orc_100",
+        "queries":["query12.sql","query25.sql"],
         "settings": [
             {
                 "config": {

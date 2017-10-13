@@ -17,6 +17,9 @@ class parseInput:
 	def db(self):
 		return self.params['wrap']['database']
 
+	def queries(self):
+		return self.params['wrap']['queries']
+
 
 
 
