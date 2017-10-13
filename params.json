@@ -1,0 +1,30 @@
+{
+    "wrap": {
+        "numRuns": 3,
+        "database":"tpcds_bin_partitioned_orc_100",
+        "settings": [
+            {
+                "config": {
+                    "ambari": {
+                        "tez-interactive-site": {
+                            "tez.runtime.io.sort.mb": "1201"
+                        }
+                    }, 
+                    "hiveconf": {
+                        "hive.auto.convert.join": "true", 
+                        "hive.auto.convert.join.noconditionaltask": "true"
+                    }, 
+                    "restart": {
+                        "components": [
+                            "HIVE/components/HIVE_SERVER_INTERACTIVE"
+                        ], 
+                        "services": [
+                            "ACCUMULO"
+                        ]
+                    }
+                }, 
+                "name": "setting1"
+            }
+        ]
+    }
+}

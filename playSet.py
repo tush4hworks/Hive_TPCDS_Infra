@@ -7,6 +7,7 @@ import hiveUtil
 import logging
 import modifyConfig
 import analyzeResults
+import InputParser
 
 class controls:
 
@@ -61,7 +62,7 @@ class controls:
 			if hasattr(e,'output'):
 				self.logger.info(e.output)
 			else:
-				self.logger.info(e.__str__)
+				self.logger.info(e.__str__())
 
 	def modifySettingsAndRestart(self,ambariSetting,services,components):
 		reset=False
@@ -90,8 +91,8 @@ class controls:
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
 				self.logger.info('----- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -----\n')
 			except Exception as e:
-				self.logger.info(e.__str__)
-				self.logger.info('+++++ FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -----\n')
+				self.logger.info(e.__str__())
+				self.logger.info('----- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -----\n')
 
 
 	def addHiveSettings(self,name,runSettings):
@@ -103,10 +104,16 @@ class controls:
 			self.hive.addRestart(name,runSettings['restart'])
 		self.hiveconfs.append(name)
 
+	def fetchParams(self,fileloc):
+		iparse=InputParser.parseInput(fileloc)
+		for setting in iparse.specified_settings():
+			self.addHiveSettings(setting['name'],setting['config'])
+		self.numRuns=iparse.numRuns()
+		self.db=iparse.db()
 
-C=controls('localhost','DPH')
-C.addHiveSettings('setting2',{'hiveconf':{'hive.auto.convert.join':'true','hive.auto.convert.join.noconditionaltask':'true'},'ambari':{},'restart':{}})
-#C.addHiveSettings('setting1',{'restart':{'components':['HIVE/components/HIVE_SERVER_INTERACTIVE']},'ambari':{'tez-interactive-site':{'tez.runtime.io.sort.mb':'1201'}}})
-C.runTests('tpcds_bin_partitioned_orc_100',C.hiveconfs,['query12.sql'],3,False)
-C.dumpResultsToCsv(3)
-C.runAnalysis()
+if __name__=='__main__':
+	C=controls('localhost','DPH')
+	C.fetchParams('params.json')
+	C.runTests(C.db,C.hiveconfs,['query12.sql'],C.numRuns,False)
+	C.dumpResultsToCsv(C.numRuns)
+	C.runAnalysis()

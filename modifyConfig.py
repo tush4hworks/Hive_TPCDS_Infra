@@ -105,14 +105,15 @@ class ambariConfig:
 		return False
 
 if __name__=='__main__':
+	'''
 	s=ambariConfig('localhost','DPH')
-	#s.printConfig('hive-interactive-site')
-	#s.printConfig('tez-interactive-site')
-	#s.putConfig('hive-interactive-site',{'hive.tez.container.size':'6144'})
-	#s.putConfig('tez-interactive-site',{'tez.runtime.io.sort.mb':'1200'})
-	#s.printConfig('hive-interactive-site')
-	#s.printConfig('tez-interactive-site')
-	#s.restartComponent('HIVE/components/HIVE_SERVER_INTERACTIVE')
+	s.putConfig('hive-interactive-site',{'hive.tez.container.size':'6144'})
+	s.putConfig('tez-interactive-site',{'tez.runtime.io.sort.mb':'1200'})
+	s.printConfig('hive-interactive-site')
+	s.printConfig('tez-interactive-site')
+	s.restartComponent('HIVE/components/HIVE_SERVER_INTERACTIVE')
+	'''
+	pass
 
 
 
