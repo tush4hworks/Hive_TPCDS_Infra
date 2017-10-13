@@ -6,6 +6,7 @@ import itertools
 import hiveUtil
 import logging
 import modifyConfig
+import analyzeResults
 
 class controls:
 
@@ -32,10 +33,19 @@ class controls:
 	def dumpResultsToCsv(self,numRuns):
 		self.logger.info(self.results)
 		with open('hiveResults.csv','w+') as f:
-			f.write(','.join(['DB','QUERY',','.join([','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in self.hiveconfs]])])])+'\n')
+			f.write(','.join(['DB','QUERY',','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in self.hiveconfs]])])+'\n')
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
 					f.write(','.join([db,ql,','.join([','.join(self.results[db][ql][hiveconf]) for hiveconf in self.hiveconfs])])+'\n')
+
+	def runAnalysis(self):
+		try:
+			self.analysis=analyzeResults.analyze(self.results)
+			self.analysis.rank_average_execution_time()
+			self.analysis.rank_optimized_queries()
+			self.analysis.closeFile()
+		except Exception as e:
+			self.logger.info(e)
 
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
 		try:
@@ -99,3 +109,4 @@ C.addHiveSettings('setting2',{'hiveconf':{'hive.auto.convert.join':'true','hive.
 #C.addHiveSettings('setting1',{'restart':{'components':['HIVE/components/HIVE_SERVER_INTERACTIVE']},'ambari':{'tez-interactive-site':{'tez.runtime.io.sort.mb':'1201'}}})
 C.runTests('tpcds_bin_partitioned_orc_100',C.hiveconfs,['query12.sql'],3,False)
 C.dumpResultsToCsv(3)
+C.runAnalysis()
