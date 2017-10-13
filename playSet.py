@@ -32,16 +32,16 @@ class controls:
 	def dumpResultsToCsv(self):
 		self.logger.info(self.results)
 		with open('hiveResults.csv','w+') as f:
-			f.write(','.join(['DB','QUERY',','.join(self.hiveconfs)])+'\n')
+			f.write(','.join(['DB','QUERY',','.join([','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in hiveconfs]])])])+'\n')
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
 					f.write(','.join([db,ql,','.join([','.join(self.results[db][ql][hiveconf]) for hiveconf in self.hiveconfs])])+'\n')
 
-	def runCmd(self,cmd,dbname,setting,hiveql):
+	def runCmd(self,cmd,dbname,setting,hiveql,numRuns):
 		try:
 			result=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
 			self.logger.info(result)
-			self.addResult(result,dbname,setting,hiveql)
+			self.addResult(result,dbname,setting,hiveql,numRuns)
 		except Exception as e:
 			if hasattr(e,'returncode'):
 				self.logger.info(e.returncode)
@@ -62,7 +62,7 @@ class controls:
 			for component in components:
 				self.modconf.restartComponent(component)
 
-	def runTests(self,dbname,settings,hiveqls,initfile=True):
+	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=True):
 		self.hive.setJDBCUrl(dbname)
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
@@ -70,10 +70,11 @@ class controls:
 				if setting in self.hive.viaAmbari.keys():
 					self.logger.info('++++ Modifying Config via ambari for '+setting+' ++++')
 					self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
-					self.logger.info('++++ Modified Config via ambari for '+setting+' ++++')
+					self.logger.info('---- Modified Config via ambari for '+setting+' ----')
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
-				self.logger.info(beelineCmd+'\n')
-				self.runCmd(beelineCmd,dbname,setting,hiveql)
+				for i in xrange(numRuns):
+					self.logger.info(beelineCmd+'\n')
+					self.runCmd(beelineCmd,dbname,setting,hiveql,numRuns)
 				self.logger.info('----- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -----\n')
 			except Exception as e:
 				self.logger.info(e.__str__)
