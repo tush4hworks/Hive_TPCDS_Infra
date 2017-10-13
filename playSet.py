@@ -29,7 +29,7 @@ class controls:
 				return
 		self.results[dbname][hiveql][setting].append('NA')
 
-	def dumpResultsToCsv(self):
+	def dumpResultsToCsv(self,numRuns):
 		self.logger.info(self.results)
 		with open('hiveResults.csv','w+') as f:
 			f.write(','.join(['DB','QUERY',','.join([','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in self.hiveconfs]])])])+'\n')
@@ -37,11 +37,11 @@ class controls:
 				for ql in self.results[db].keys():
 					f.write(','.join([db,ql,','.join([','.join(self.results[db][ql][hiveconf]) for hiveconf in self.hiveconfs])])+'\n')
 
-	def runCmd(self,cmd,dbname,setting,hiveql,numRuns):
+	def runCmd(self,cmd,dbname,setting,hiveql):
 		try:
 			result=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
 			self.logger.info(result)
-			self.addResult(result,dbname,setting,hiveql,numRuns)
+			self.addResult(result,dbname,setting,hiveql)
 		except Exception as e:
 			if hasattr(e,'returncode'):
 				self.logger.info(e.returncode)
@@ -74,7 +74,7 @@ class controls:
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
 				for i in xrange(numRuns):
 					self.logger.info(beelineCmd+'\n')
-					self.runCmd(beelineCmd,dbname,setting,hiveql,numRuns)
+					self.runCmd(beelineCmd,dbname,setting,hiveql)
 				self.logger.info('----- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -----\n')
 			except Exception as e:
 				self.logger.info(e.__str__)
@@ -92,7 +92,7 @@ class controls:
 
 
 C=controls('localhost','DPH')
-C.addHiveSettings('setting2',{'hiveconf':{'hive.auto.convert.join':'false','hive.auto.convert.join.noconditionaltask':'false'},'ambari':{},'restart':{}})
-C.addHiveSettings('setting1',{'restart':{'components':['HIVE/components/HIVE_SERVER_INTERACTIVE']},'ambari':{'tez-interactive-site':{'tez.runtime.io.sort.mb':'1201'}}})
-C.runTests('tpcds_bin_partitioned_orc_100',C.hiveconfs,['query25.sql','query12.sql'],False)
-C.dumpResultsToCsv()
+C.addHiveSettings('setting2',{'hiveconf':{'hive.auto.convert.join':'true','hive.auto.convert.join.noconditionaltask':'true'},'ambari':{},'restart':{}})
+#C.addHiveSettings('setting1',{'restart':{'components':['HIVE/components/HIVE_SERVER_INTERACTIVE']},'ambari':{'tez-interactive-site':{'tez.runtime.io.sort.mb':'1201'}}})
+C.runTests('tpcds_bin_partitioned_orc_100',C.hiveconfs,['query12.sql'],3,False)
+C.dumpResultsToCsv(3)
