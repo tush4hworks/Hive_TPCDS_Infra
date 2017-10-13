@@ -32,7 +32,7 @@ class controls:
 	def dumpResultsToCsv(self):
 		self.logger.info(self.results)
 		with open('hiveResults.csv','w+') as f:
-			f.write(','.join(['DB','QUERY',','.join([','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in hiveconfs]])])])+'\n')
+			f.write(','.join(['DB','QUERY',','.join([','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in self.hiveconfs]])])])+'\n')
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
 					f.write(','.join([db,ql,','.join([','.join(self.results[db][ql][hiveconf]) for hiveconf in self.hiveconfs])])+'\n')
