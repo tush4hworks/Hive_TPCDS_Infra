@@ -17,7 +17,7 @@ class controls:
 
 	def __init__(self,host,cluster):
 		FORMAT = '%(asctime)-s-%(levelname)s-%(message)s'
-		logging.basicConfig(format=FORMAT,filename='hivetests.log',level='INFO')
+		logging.basicConfig(format=FORMAT,filename='hivetests.log',filemode='w',level='INFO')
 		self.logger=logging.getLogger(__name__)
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 		self.hive=hiveUtil.hiveUtil()
@@ -50,11 +50,11 @@ class controls:
 
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
 		try:
-			self.logger.info('++++ Executing command '+cmd+' ++++')
+			self.logger.info('+++++ Executing command '+cmd+' +++++')
 			result=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
 			with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
 				f.write(result)
-			self.logger.info('---- Finished executing command '+cmd+' ----')
+			self.logger.info('----- Finished executing command '+cmd+' -----')
 			self.addResult(result,dbname,setting,hiveql)
 		except Exception as e:
 			if hasattr(e,'returncode'):
@@ -70,11 +70,15 @@ class controls:
 			if self.modconf.putConfig(key,ambariSetting[key]):
 				reset=True
 		if reset:
-			self.logger.info('++++ Config changed. Going to restart components if any! ++++')
+			self.logger.info('++++ Config changed. Going to restart services/components if any! ++++')
 			for service in services:
+				self.logger.info('+++++ Restarting '+service+' +++++')
 				self.modconf.restartService(service)
+				self.logger.info('----- Restarted '+service+' -----')
 			for component in components:
+				self.logger.info('+++++ Restarting '+component+' +++++')
 				self.modconf.restartComponent(component)
+				self.logger.info('----- Restarted '+component+' -----')
 
 	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=True):
 		self.hive.setJDBCUrl(dbname)
@@ -82,17 +86,17 @@ class controls:
 			try:
 				self.logger.info('+++++ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +++++\n')
 				if setting in self.hive.viaAmbari.keys():
-					self.logger.info('++++ Modifying Config via ambari for '+setting+' ++++')
+					self.logger.info('+++++ Modifying Config via ambari for '+setting+' +++++')
 					self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
-					self.logger.info('---- Modified Config via ambari for '+setting+' ----')
+					self.logger.info('----- Modified Config via ambari for '+setting+' -----')
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
 				for i in xrange(numRuns):
 					self.logger.info(beelineCmd+'\n')
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
-				self.logger.info('----- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -----\n')
+				self.logger.info('----- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -----')
 			except Exception as e:
 				self.logger.info(e.__str__())
-				self.logger.info('----- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -----\n')
+				self.logger.info('----- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -----')
 
 
 	def addHiveSettings(self,name,runSettings):
