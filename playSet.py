@@ -22,7 +22,7 @@ class controls:
 		self.hive=hiveUtil.hiveUtil()
 		self.hiveconfs=[]
 		self.modconf=modifyConfig.ambariConfig(host,cluster)
-		self.bLog=beelineLogger.bLog
+		self.bLog=beelineLogger.bLog()
 
 	def addResult(self,queryOut,dbname,setting,hiveql):
 		for line in queryOut.split('\n')[-1:0:-1]:
