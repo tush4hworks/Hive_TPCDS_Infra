@@ -18,6 +18,7 @@ class controls:
 	def __init__(self,host,cluster):
 		FORMAT = '%(asctime)-s-%(levelname)s-%(message)s'
 		logging.basicConfig(format=FORMAT,filename='hivetests.log',filemode='w',level='INFO')
+		logging.getLogger("requests").setLevel(logging.WARNING)
 		self.logger=logging.getLogger(__name__)
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 		self.hive=hiveUtil.hiveUtil()
@@ -37,7 +38,7 @@ class controls:
 			f.write(','.join(['DB','QUERY',','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in self.hiveconfs]])])+'\n')
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
-					f.write(','.join([db,ql,','.join([','.join(self.results[db][ql][hiveconf]) for hiveconf in self.hiveconfs])])+'\n')
+					f.write(','.join([db,ql,','.join([','.join([str(exec_time) for exec_time in self.results[db][ql][hiveconf]]) for hiveconf in self.hiveconfs])])+'\n')
 
 	def runAnalysis(self):
 		try:
@@ -86,12 +87,12 @@ class controls:
 			try:
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +\n')
 				if setting in self.hive.viaAmbari.keys():
-					self.logger.info('+ Modifying Config via ambari for '+setting+' +')
+					self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
 					self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
-					self.logger.info('- Modified Config via ambari for '+setting+' -')
-				self.logger.info('Hive Settings for '+setting)
-				self.logger.info(self.modconf.getConfig('hive-interactive-site'))
-				self.logger.info(self.modconf.getConfig('tez-interactive-site'))
+				self.logger.info('Starting execution with below configurations for '+setting)
+				self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-site'),indent=4,sort_keys=True))
+				self.logger.info(json.dumps(self.modconf.getConfig('tez-interactive-site'),indent=4,sort_keys=True))
+				self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-env'),indent=4,sort_keys=True))
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
 				for i in xrange(numRuns):
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
