@@ -8,6 +8,7 @@ import logging
 import modifyConfig
 import analyzeResults
 import InputParser
+import json
 
 class controls:
 
@@ -85,7 +86,7 @@ class controls:
 		self.hive.setJDBCUrl(dbname)
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
-				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +\n')
+				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if setting in self.hive.viaAmbari.keys():
 					self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
 					self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
