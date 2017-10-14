@@ -89,9 +89,11 @@ class controls:
 					self.logger.info('+ Modifying Config via ambari for '+setting+' +')
 					self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
 					self.logger.info('- Modified Config via ambari for '+setting+' -')
+				self.logger.info('Hive Settings for '+setting)
+				self.logger.info(self.modconf.getConfig('hive-interactive-site'))
+				self.logger.info(self.modconf.getConfig('tez-interactive-site'))
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
 				for i in xrange(numRuns):
-					self.logger.info(beelineCmd+'\n')
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
 				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
 			except Exception as e:

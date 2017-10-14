@@ -8,24 +8,68 @@
                 "config": {
                     "ambari": {
                         "tez-interactive-site": {
-                            "tez.runtime.io.sort.mb": "1201"
-                        }
+                            "tez.runtime.io.sort.mb": "1200"
+                        },
+            "hive-interactive-site":{
+                "hive.llap.io.memory.size" : "5000",
+                    "hive.llap.io.threadpool.size" : "14",
+                "hive.tez.container.size" : "4096"
+            },
+            "hive-interactive-env":{
+            "llap_heap_size" : "40000"
+            }
                     }, 
                     "hiveconf": {
                         "hive.auto.convert.join": "true", 
-                        "hive.auto.convert.join.noconditionaltask": "true"
+                        "hive.auto.convert.join.noconditionaltask": "true",
+            " hive.cbo.enable":"true",
+             "hive.stats.autogather":"true"
                     }, 
                     "restart": {
                         "components": [
                             "HIVE/components/HIVE_SERVER_INTERACTIVE"
                         ], 
                         "services": [
-                            "ACCUMULO"
+                     
                         ]
                     }
                 }, 
                 "name": "setting1"
+            },
+{
+                "config": {
+                    "ambari": {
+                        "tez-interactive-site": {
+                            "tez.runtime.io.sort.mb": "1200"
+                        },
+                        "hive-interactive-site":{
+                                "hive.llap.io.memory.size" : "15000",
+                                "hive.llap.io.threadpool.size" : "14",
+                                "hive.tez.container.size" : "2048"
+                        },
+
+                        "hive-interactive-env":{
+                        "llap_heap_size" : "30000"
+                        }
+                    },
+                    "hiveconf": {
+                        "hive.auto.convert.join": "false",
+                        "hive.auto.convert.join.noconditionaltask": "false",
+                        " hive.cbo.enable":"false",
+                        "hive.stats.autogather":"false"
+                    },
+                    "restart": {
+                        "components": [
+                         "HIVE/components/HIVE_SERVER_INTERACTIVE"
+                        ],
+                        "services": [
+                            
+                        ]
+                    }
+                },
+                "name": "setting2"
             }
+
         ]
     }
 }

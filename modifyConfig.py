@@ -36,10 +36,13 @@ class ambariConfig:
 	def printConfig(self,config):
 		confs=self.commonGet(self.prefix+'?fields=Clusters/desired_configs')
 		if confs:
-			tag=json.loads(confs)['Clusters']['desired_configs'][config]['tag']
-			service_conf=self.commonGet(self.prefix+'/configurations?type='+config+'&tag='+tag)
-			if service_conf: 
-				print service_conf
+			try:
+				tag=json.loads(confs)['Clusters']['desired_configs'][config]['tag']
+				service_conf=self.commonGet(self.prefix+'/configurations?type='+config+'&tag='+tag)
+				if service_conf: 
+					print service_conf
+			except KeyError:
+				print 'Desired Config does not exist!. Please check config name.'
 			
 	def getConfig(self,config):
 		confs=self.commonGet(self.prefix+'?fields=Clusters/desired_configs')
@@ -105,8 +108,10 @@ class ambariConfig:
 		return False
 
 if __name__=='__main__':
-	'''
 	s=ambariConfig('localhost','DPH')
+	s.printConfig('hive-interactive-env')
+	#s.printConfig('tez-interactive-site')
+	'''
 	s.putConfig('hive-interactive-site',{'hive.tez.container.size':'6144'})
 	s.putConfig('tez-interactive-site',{'tez.runtime.io.sort.mb':'1200'})
 	s.printConfig('hive-interactive-site')
