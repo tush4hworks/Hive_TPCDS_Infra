@@ -27,7 +27,7 @@ class controls:
 	def addResult(self,queryOut,dbname,setting,hiveql):
 		for line in queryOut.split('\n')[-1:0:-1]:
 			if re.search(controls.success_regex,line,re.I):
-				self.results[dbname][hiveql][setting].append(re.search(controls.success_regex,line,re.I).group())
+				self.results[dbname][hiveql][setting].append(float(re.search(controls.success_regex,line,re.I).group().split('seconds')[0].strip()))
 				return
 		self.results[dbname][hiveql][setting].append('NA')
 
