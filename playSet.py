@@ -17,6 +17,7 @@ class controls:
 	dag_regex=r'100%\s+ELAPSED TIME:\s+\d+.\d+\s+s'
 
 	def __init__(self,host,cluster):
+		"""Init Function for class controls"""
 		FORMAT = '%(asctime)-s-%(levelname)s-%(message)s'
 		logging.basicConfig(format=FORMAT,filename='hivetests.log',filemode='w',level='INFO')
 		logging.getLogger("requests").setLevel(logging.WARNING)
@@ -27,6 +28,7 @@ class controls:
 		self.modconf=modifyConfig.ambariConfig(host,cluster)
 
 	def addResult(self,queryOut,dbname,setting,hiveql):
+		"""Parse beeline output"""
 		for line in queryOut.split('\n')[-1:0:-1]:
 			if re.search(controls.success_regex,line,re.I):
 				self.results[dbname][hiveql][setting].append(float(re.search(controls.success_regex,line,re.I).group().split('seconds')[0].strip()))
@@ -34,6 +36,7 @@ class controls:
 		self.results[dbname][hiveql][setting].append('NA')
 
 	def dumpResultsToCsv(self,numRuns):
+		"""Create CSV"""
 		self.logger.info(self.results)
 		with open('hiveResults.csv','w+') as f:
 			f.write(','.join(['DB','QUERY',','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in self.hiveconfs]])])+'\n')
@@ -42,6 +45,7 @@ class controls:
 					f.write(','.join([db,ql,','.join([','.join([str(exec_time) for exec_time in self.results[db][ql][hiveconf]]) for hiveconf in self.hiveconfs])])+'\n')
 
 	def runAnalysis(self):
+		"""Run basic analysis, sort by total time taken, gather best configuration for every query"""
 		try:
 			self.analysis=analyzeResults.analyze(self.results)
 			self.analysis.rank_average_execution_time()
@@ -51,6 +55,7 @@ class controls:
 			self.logger.info(e)
 
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
+		"""Wrapper to run shell"""
 		try:
 			self.logger.info('+ Executing command '+cmd+' +')
 			result=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
@@ -67,6 +72,7 @@ class controls:
 				self.logger.info(e.__str__())
 
 	def modifySettingsAndRestart(self,ambariSetting,services,components):
+		"""Calling ambari API to change configuration and restart services/components"""
 		reset=False
 		for key in ambariSetting.keys():
 			if self.modconf.putConfig(key,ambariSetting[key]):
@@ -83,6 +89,7 @@ class controls:
 				self.logger.info('- Restarted '+component+' -')
 
 	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=True):
+		"""Main entry function to run TPCDS suite"""
 		self.hive.setJDBCUrl(dbname)
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
@@ -104,6 +111,7 @@ class controls:
 
 
 	def addHiveSettings(self,name,runSettings):
+		"""Segregate settings and add"""
 		if 'hiveconf' in runSettings.keys():
 			self.hive.addSettings(name,runSettings['hiveconf'])
 		if 'ambari' in runSettings.keys():
@@ -113,6 +121,7 @@ class controls:
 		self.hiveconfs.append(name)
 
 	def fetchParams(self,fileloc):
+		"""Parse input json"""
 		iparse=InputParser.parseInput(fileloc)
 		for setting in iparse.specified_settings():
 			self.addHiveSettings(setting['name'],setting['config'])

@@ -10,14 +10,16 @@ class analyze:
 	def rank_average_execution_time(self):
 		try:
 			rank_dict=defaultdict(lambda:float(0))
+			total_dict=defaultdict(lambda:float(0))
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
 					for setting in self.results[db][ql].keys():
 						rank_dict[setting]+=float(sum([item for item in self.results[db][ql][setting] if item!='NA'])/len([item for item in self.results[db][ql][setting] if item!='NA']))
+						total_dict[setting]+=float(sum([item for item in self.results[db][ql][setting] if item!='NA']))
 			self.f.write('SETTINGS RANKED ON AVERAGE EXECUTION TIMES\n')
-			self.f.write('SETTING,AVERAGE EXECUTION TIME\n')
+			self.f.write('SETTING,AVERAGE EXECUTION TIME,TOTAL EXECUTION TIME\n')
 			for key,val in sorted(rank_dict.items(),key=lambda x:x[1]):
-				self.f.write(','.join([key,str(val)])+'\n')
+				self.f.write(','.join([key,str(val),str(total_dict[key])])+'\n')
 		except Exception as e:
 			print e.__str__()
 
