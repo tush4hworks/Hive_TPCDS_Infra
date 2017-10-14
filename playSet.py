@@ -57,11 +57,11 @@ class controls:
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
 		"""Wrapper to run shell"""
 		try:
-			self.logger.info('+ Executing command '+cmd+' +')
+			self.logger.info('+ Executing command '+cmd)
 			result=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
 			with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
 				f.write(result)
-			self.logger.info('- Finished executing command '+cmd+' -')
+			self.logger.info('- Finished executing command '+cmd)
 			self.addResult(result,dbname,setting,hiveql)
 		except Exception as e:
 			if hasattr(e,'returncode'):
