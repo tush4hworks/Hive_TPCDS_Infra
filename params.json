@@ -1,75 +1,197 @@
 {
-    "wrap": {
-        "numRuns": 3,
-        "database":"tpcds_bin_partitioned_orc_100",
-        "queries":["query12.sql","query25.sql"],
-        "settings": [
-            {
-                "config": {
-                    "ambari": {
-                        "tez-interactive-site": {
-                            "tez.runtime.io.sort.mb": "1200"
-                        },
-            "hive-interactive-site":{
-                "hive.llap.io.memory.size" : "5000",
-                    "hive.llap.io.threadpool.size" : "14",
-                "hive.tez.container.size" : "4096"
+  "wrap": {
+    "numRuns": 3,
+    "database": "tpcds_bin_partitioned_orc_100",
+    "queries": [
+      "query12.sql",
+      "query25.sql"
+    ],
+    "settings": [
+      {
+        "config": {
+          "ambari": {
+            "tez-interactive-site": {
+              "tez.runtime.io.sort.mb": "1200"
             },
-            "hive-interactive-env":{
-            "llap_heap_size" : "40000"
-            }
-                    }, 
-                    "hiveconf": {
-                        "hive.auto.convert.join": "true", 
-                        "hive.auto.convert.join.noconditionaltask": "true",
-            " hive.cbo.enable":"true",
-             "hive.stats.autogather":"true"
-                    }, 
-                    "restart": {
-                        "components": [
-                            "HIVE/components/HIVE_SERVER_INTERACTIVE"
-                        ], 
-                        "services": [
-                     
-                        ]
-                    }
-                }, 
-                "name": "setting1"
+            "hive-interactive-site": {
+              "hive.llap.io.memory.size": "5000",
+              "hive.llap.io.threadpool.size": "14",
+              "hive.tez.container.size": "4096",
+              "hive.auto.convert.join.noconditionaltask.size": "1145044992"
             },
-{
-                "config": {
-                    "ambari": {
-                        "tez-interactive-site": {
-                            "tez.runtime.io.sort.mb": "1200"
-                        },
-                        "hive-interactive-site":{
-                                "hive.llap.io.memory.size" : "15000",
-                                "hive.llap.io.threadpool.size" : "14",
-                                "hive.tez.container.size" : "2048"
-                        },
-
-                        "hive-interactive-env":{
-                        "llap_heap_size" : "30000"
-                        }
-                    },
-                    "hiveconf": {
-                        "hive.auto.convert.join": "false",
-                        "hive.auto.convert.join.noconditionaltask": "false",
-                        " hive.cbo.enable":"false",
-                        "hive.stats.autogather":"false"
-                    },
-                    "restart": {
-                        "components": [
-                         "HIVE/components/HIVE_SERVER_INTERACTIVE"
-                        ],
-                        "services": [
-                            
-                        ]
-                    }
-                },
-                "name": "setting2"
+            "hive-interactive-env": {
+              "llap_heap_size": "40000"
             }
-
-        ]
-    }
+          },
+          "hiveconf": {
+            "hive.auto.convert.join": "true",
+            "hive.auto.convert.join.noconditionaltask": "true",
+            "hive.cbo.enable": "true",
+            "hive.stats.autogather": "true",
+            "hive.llap.task.scheduler.locality.delay": "0",
+            "hive.llap.auto.allow.uber": "true",
+            "hive.vectorized.execution.enabled": "true",
+            "hive.vectorized.execution.reduce.enabled": "true",
+            "hive.vectorized.execution.reduce.groupby.enabled": "true",
+            "hive.optimize.index.filter": "true"
+          },
+          "restart": {
+            "components": [
+              "HIVE/components/HIVE_SERVER_INTERACTIVE"
+            ],
+            "services": []
+          }
+        },
+        "name": "setting1"
+      },
+      {
+        "config": {
+          "ambari": {
+            "tez-interactive-site": {
+              "tez.runtime.io.sort.mb": "800"
+            },
+            "hive-interactive-site": {
+              "hive.llap.io.memory.size": "15000",
+              "hive.llap.io.threadpool.size": "14",
+              "hive.tez.container.size": "2048",
+              "hive.auto.convert.join.noconditionaltask.size": "605044992"
+            },
+            "hive-interactive-env": {
+              "llap_heap_size": "30000"
+            }
+          },
+          "hiveconf": {
+            "hive.auto.convert.join": "true",
+            "hive.auto.convert.join.noconditionaltask": "true",
+            "hive.cbo.enable": "true",
+            "hive.stats.autogather": "true",
+            "hive.llap.task.scheduler.locality.delay": "0",
+            "hive.llap.auto.allow.uber": "true",
+            "hive.vectorized.execution.enabled": "true",
+            "hive.vectorized.execution.reduce.enabled": "true",
+            "hive.vectorized.execution.reduce.groupby.enabled": "true",
+            "hive.optimize.index.filter": "true"
+          },
+          "restart": {
+            "components": [
+              "HIVE/components/HIVE_SERVER_INTERACTIVE"
+            ],
+            "services": []
+          }
+        },
+        "name": "setting2"
+      },
+      {
+        "config": {
+          "ambari": {
+            "tez-interactive-site": {
+              "tez.runtime.io.sort.mb": "2000"
+            },
+            "hive-interactive-site": {
+              "hive.llap.io.memory.size": "4000",
+              "hive.llap.io.threadpool.size": "14",
+              "hive.tez.container.size": "6144",
+              "hive.auto.convert.join.noconditionaltask.size": "1605044992"
+            },
+            "hive-interactive-env": {
+              "llap_heap_size": "41000"
+            }
+          },
+          "hiveconf": {
+            "hive.auto.convert.join": "true",
+            "hive.auto.convert.join.noconditionaltask": "true",
+            "hive.cbo.enable": "true",
+            "hive.stats.autogather": "true",
+            "hive.llap.task.scheduler.locality.delay": "0",
+            "hive.llap.auto.allow.uber": "true",
+            "hive.vectorized.execution.enabled": "true",
+            "hive.vectorized.execution.reduce.enabled": "true",
+            "hive.vectorized.execution.reduce.groupby.enabled": "true",
+            "hive.optimize.index.filter": "true"
+          },
+          "restart": {
+            "components": [
+              "HIVE/components/HIVE_SERVER_INTERACTIVE"
+            ],
+            "services": []
+          }
+        },
+        "name": "setting3"
+      },
+      {
+        "config": {
+          "ambari": {
+            "tez-interactive-site": {
+              "tez.runtime.io.sort.mb": "1200"
+            },
+            "hive-interactive-site": {
+              "hive.llap.io.memory.size": "10000",
+              "hive.llap.io.threadpool.size": "14",
+              "hive.tez.container.size": "4096",
+              "hive.auto.convert.join.noconditionaltask.size": "1105044992"
+            },
+            "hive-interactive-env": {
+              "llap_heap_size": "35000"
+            }
+          },
+          "hiveconf": {
+            "hive.auto.convert.join": "true",
+            "hive.auto.convert.join.noconditionaltask": "true",
+            "hive.cbo.enable": "true",
+            "hive.stats.autogather": "true",
+            "hive.llap.task.scheduler.locality.delay": "0",
+            "hive.llap.auto.allow.uber": "true",
+            "hive.vectorized.execution.enabled": "true",
+            "hive.vectorized.execution.reduce.enabled": "true",
+            "hive.vectorized.execution.reduce.groupby.enabled": "true",
+            "hive.optimize.index.filter": "true"
+          },
+          "restart": {
+            "components": [
+              "HIVE/components/HIVE_SERVER_INTERACTIVE"
+            ],
+            "services": []
+          }
+        },
+        "name": "setting4"
+      },
+      {
+        "config": {
+          "ambari": {
+            "tez-interactive-site": {
+              "tez.runtime.io.sort.mb": "1200"
+            },
+            "hive-interactive-site": {
+              "hive.llap.io.memory.size": "8000",
+              "hive.llap.io.threadpool.size": "14",
+              "hive.tez.container.size": "4096",
+              "hive.auto.convert.join.noconditionaltask.size": "1105044992"
+            },
+            "hive-interactive-env": {
+              "llap_heap_size": "37000"
+            }
+          },
+          "hiveconf": {
+            "hive.auto.convert.join": "true",
+            "hive.auto.convert.join.noconditionaltask": "true",
+            "hive.cbo.enable": "true",
+            "hive.stats.autogather": "true",
+            "hive.llap.task.scheduler.locality.delay": "0",
+            "hive.llap.auto.allow.uber": "true",
+            "hive.vectorized.execution.enabled": "true",
+            "hive.vectorized.execution.reduce.enabled": "true",
+            "hive.vectorized.execution.reduce.groupby.enabled": "true",
+            "hive.optimize.index.filter": "true"
+          },
+          "restart": {
+            "components": [
+              "HIVE/components/HIVE_SERVER_INTERACTIVE"
+            ],
+            "services": []
+          }
+        },
+        "name": "setting5"
+      }
+    ]
+  }
 }
