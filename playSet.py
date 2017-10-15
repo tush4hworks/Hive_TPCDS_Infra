@@ -67,10 +67,10 @@ class controls:
 			if hasattr(e,'returncode'):
 				self.logger.info(e.returncode)
 			if hasattr(e,'output'):
-				self.logger.info(e.output)
-			else:
-				self.logger.info(e.__str__())
-
+				with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
+					f.write(result)
+					return
+		
 	def modifySettingsAndRestart(self,ambariSetting,services,components):
 		"""Calling ambari API to change configuration and restart services/components"""
 		reset=False
@@ -92,15 +92,18 @@ class controls:
 		"""Main entry function to run TPCDS suite"""
 		self.hive.setJDBCUrl(dbname)
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
+			currSet=None
 			try:
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if setting in self.hive.viaAmbari.keys():
 					self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
 					self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
 				self.logger.info('Starting execution with below configurations for '+setting)
-				self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-site'),indent=4,sort_keys=True))
-				self.logger.info(json.dumps(self.modconf.getConfig('tez-interactive-site'),indent=4,sort_keys=True))
-				self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-env'),indent=4,sort_keys=True))
+				if not(currSet) or not(setting==currSet):
+					self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-site'),indent=4,sort_keys=True))
+					self.logger.info(json.dumps(self.modconf.getConfig('tez-interactive-site'),indent=4,sort_keys=True))
+					self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-env'),indent=4,sort_keys=True))
+					currSet=setting
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
 				for i in xrange(numRuns):
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
