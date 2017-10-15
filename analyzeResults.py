@@ -11,15 +11,19 @@ class analyze:
 		try:
 			rank_dict=defaultdict(lambda:float(0))
 			total_dict=defaultdict(lambda:float(0))
+			exception_list=defaultdict(lambda:[])
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
 					for setting in self.results[db][ql].keys():
+						if set(self.results[db][ql][setting])==set(['NA']):
+							exception_list[setting].append(ql)
+							continue
 						rank_dict[setting]+=float(sum([item for item in self.results[db][ql][setting] if item!='NA'])/len([item for item in self.results[db][ql][setting] if item!='NA']))
 						total_dict[setting]+=float(sum([item for item in self.results[db][ql][setting] if item!='NA']))
 			self.f.write('SETTINGS RANKED ON AVERAGE EXECUTION TIMES\n')
 			self.f.write('SETTING,AVERAGE EXECUTION TIME,TOTAL EXECUTION TIME\n')
 			for key,val in sorted(rank_dict.items(),key=lambda x:x[1]):
-				self.f.write(','.join([key,str(val),str(total_dict[key])])+'\n')
+				self.f.write(','.join([key,str(val),str(total_dict[key]),'Failed for Queries '+'-'.join(exception_list[key]) if exception_list[key] else 'Passed' ])+'\n')
 		except Exception as e:
 			print e.__str__()
 
@@ -30,6 +34,8 @@ class analyze:
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
 					for setting in self.results[db][ql].keys():
+						if set(self.results[db][ql][setting])==set(['NA']):
+							continue
 						time_taken=float(sum([item for item in self.results[db][ql][setting] if item!='NA'])/len([item for item in self.results[db][ql][setting] if item!='NA']))
 						if time_taken<optimal_dict[ql][1]:
 							optimal_dict[ql]=[setting,time_taken]
