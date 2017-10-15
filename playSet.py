@@ -90,15 +90,15 @@ class controls:
 	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=True):
 		"""Main entry function to run TPCDS suite"""
 		self.hive.setJDBCUrl(dbname)
+		currSet=None
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
-			currSet=None
 			try:
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if setting in self.hive.viaAmbari.keys():
 					self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
 					self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
-				self.logger.info('Starting execution with below configurations for '+setting)
 				if not(currSet) or not(setting==currSet):
+					self.logger.info('Starting execution with below configurations for '+setting)
 					self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-site'),indent=4,sort_keys=True))
 					self.logger.info(json.dumps(self.modconf.getConfig('tez-interactive-site'),indent=4,sort_keys=True))
 					self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-env'),indent=4,sort_keys=True))
