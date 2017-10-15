@@ -65,11 +65,10 @@ class controls:
 			self.addResult(result,dbname,setting,hiveql)
 		except Exception as e:
 			self.logger.info('- Finished executing command with exception '+cmd)
-			self.addResult('Finished with exception',dbname,setting,hiveql)
+			self.addResult('NA',dbname,setting,hiveql)
 			if hasattr(e,'output'):
 				with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
 					f.write(e.output)
-					return
 		
 	def modifySettingsAndRestart(self,ambariSetting,services,components):
 		"""Calling ambari API to change configuration and restart services/components"""
