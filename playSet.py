@@ -66,9 +66,10 @@ class controls:
 		except Exception as e:
 			if hasattr(e,'returncode'):
 				self.logger.info(e.returncode)
+				self.addSettings('Finished with exception',dbname,setting,hiveql)
 			if hasattr(e,'output'):
 				with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
-					f.write(result)
+					f.write(e.output)
 					return
 		
 	def modifySettingsAndRestart(self,ambariSetting,services,components):
