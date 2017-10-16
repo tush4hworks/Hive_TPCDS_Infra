@@ -16,7 +16,7 @@ class analyze:
 				for ql in self.results[db].keys():
 					for setting in self.results[db][ql].keys():
 						if 'NA' in self.results[db][ql][setting]:
-							self.exception_list[setting].append(ql)
+							exception_list[setting].append(ql)
 						if set(self.results[db][ql][setting])==set(['NA']):
 							continue
 						rank_dict[setting]+=float(sum([item for item in self.results[db][ql][setting] if item!='NA'])/len([item for item in self.results[db][ql][setting] if item!='NA']))
