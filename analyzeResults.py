@@ -47,7 +47,7 @@ class analyze:
 				slist.append(optimal_dict[key][0])
 			self.f.write('SETTINGS RANKED ON MOST OPTIMIZED QUERIES\n')
 			self.f.write('SETTING,BEST PERFORMING QUERIES\n')
-			for setting in sorted(list(set(slist)),key=lambda x:slist.count(x)):
+			for setting in sorted(list(set(slist)),key=lambda x:slist.count(x),reverse=True):
 				self.f.write(','.join([setting,str(slist.count(setting))])+'\n')
 		except Exception as e:
 			print e.__str__()
