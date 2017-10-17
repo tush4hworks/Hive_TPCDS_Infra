@@ -70,13 +70,13 @@ class controls:
 				with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
 					f.write(e.output)
 		
-	def modifySettingsAndRestart(self,ambariSetting,services,components):
+	def modifySettingsAndRestart(self,ambariSetting,services,components,force_restart=False):
 		"""Calling ambari API to change configuration and restart services/components"""
 		reset=False
 		for key in ambariSetting.keys():
 			if self.modconf.putConfig(key,ambariSetting[key]):
 				reset=True
-		if reset:
+		if reset or force_restart:
 			self.logger.warn('+ Config changed. Going to restart services/components if any! +')
 			for service in services:
 				self.logger.info('+ Restarting '+service+' +')
@@ -95,13 +95,15 @@ class controls:
 			try:
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if not(currSet) or not(setting==currSet):
+					force_restart=False
 					if setting in self.hive.viaAmbari.keys():
 						if currSet and self.rollBack:
 							self.logger.warn('+ Rolling back to base version before making changes for setting '+currSet+ '+')
 							self.modconf.rollBackConfig('HIVE',self.base_version) 
 							self.logger.info('- Rolled back to base version before making changes for setting '+currSet+ '-')
+							force_restart=True
 						self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
-						self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'])
+						self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'],force_restart)
 					self.logger.info('Starting execution with below configurations for '+setting)
 					self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-site'),indent=4,sort_keys=True))
 					self.logger.info(json.dumps(self.modconf.getConfig('tez-interactive-site'),indent=4,sort_keys=True))
