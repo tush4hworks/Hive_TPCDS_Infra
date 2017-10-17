@@ -52,7 +52,7 @@ class controls:
 			self.analysis.rank_optimized_queries()
 			self.analysis.closeFile()
 		except Exception as e:
-			self.logger.info(e)
+			self.logger.error(e)
 
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
 		"""Wrapper to run shell"""
@@ -64,7 +64,7 @@ class controls:
 			self.logger.info('- Finished executing command '+cmd)
 			self.addResult(result,dbname,setting,hiveql)
 		except Exception as e:
-			self.logger.info('- Finished executing command with exception '+cmd)
+			self.logger.error('- Finished executing command with exception '+cmd)
 			self.addResult('NA',dbname,setting,hiveql)
 			if hasattr(e,'output'):
 				with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
@@ -77,7 +77,7 @@ class controls:
 			if self.modconf.putConfig(key,ambariSetting[key]):
 				reset=True
 		if reset:
-			self.logger.info('+ Config changed. Going to restart services/components if any! +')
+			self.logger.warn('+ Config changed. Going to restart services/components if any! +')
 			for service in services:
 				self.logger.info('+ Restarting '+service+' +')
 				self.modconf.restartService(service)
@@ -89,7 +89,7 @@ class controls:
 
 	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=True):
 		"""Main entry function to run TPCDS suite"""
-		self.hive.setJDBCUrl(dbname)
+		self.hive.setJDBCUrl(self.conn_str,dbname)
 		currSet=None
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
@@ -97,7 +97,7 @@ class controls:
 				if not(currSet) or not(setting==currSet):
 					if setting in self.hive.viaAmbari.keys():
 						if currSet and self.rollBack:
-							self.logger.info('+ Rolling back to base version before making changes for setting '+currSet+ '+')
+							self.logger.warn('+ Rolling back to base version before making changes for setting '+currSet+ '+')
 							self.modconf.rollBackConfig('HIVE',self.base_version) 
 							self.logger.info('- Rolled back to base version before making changes for setting '+currSet+ '-')
 						self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
@@ -112,8 +112,8 @@ class controls:
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
 				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
 			except Exception as e:
-				self.logger.info(e.__str__())
-				self.logger.info('- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -')
+				self.logger.error(e.__str__())
+				self.logger.warn('- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -')
 
 
 	def addHiveSettings(self,name,runSettings):
@@ -132,6 +132,7 @@ class controls:
 		for setting in iparse.specified_settings():
 			self.addHiveSettings(setting['name'],setting['config'])
 		self.numRuns=iparse.numRuns()
+		self.conn_str=iparse.conn_str()
 		self.db=iparse.db()
 		self.queries=iparse.queries()
 		self.rollBack=iparse.rollBack()

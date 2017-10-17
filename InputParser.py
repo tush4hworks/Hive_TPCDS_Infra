@@ -27,6 +27,9 @@ class parseInput:
 		if 'base_version' in self.params['wrap'].keys():
 			return int(self.params['wrap']['base_version'])
 
+	def conn_str(self):
+		return self.params['wrap']['connection_url']
+
 
 
 

@@ -36,8 +36,8 @@ class hiveUtil:
 			return ' '.join([' '.join(['--hiveconf','='.join([key,confdir[key]])]) for key in confdir.keys()])
 		return ''
 
-	def setJDBCUrl(self,dbname):
-		self.hs2url="'jdbc:hive2://c01s03.hadoop.local:2181,c01s02.hadoop.local:2181,c01s01.hadoop.local:2181/"+dbname+";serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2-hive2'"
+	def setJDBCUrl(self,conn_str,dbname):
+		self.hs2url=';'.join([conn_str.split(';')[0]+dbname,';'.join(conn_str.split(';')[1:])])
 
 	def BeelineCommand(self,setting,hiveql,initfile=True):
 		if initfile:
