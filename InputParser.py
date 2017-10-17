@@ -20,6 +20,13 @@ class parseInput:
 	def queries(self):
 		return self.params['wrap']['queries']
 
+	def rollBack(self):
+		return (self.params['wrap']['enableRollBack'].lower()=='true')
+
+	def base_version(self):
+		if 'base_version' in self.params['wrap'].keys():
+			return int(self.params['wrap']['base_version'])
+
 
 
 

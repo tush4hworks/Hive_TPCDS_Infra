@@ -55,6 +55,19 @@ class ambariConfig:
 			except KeyError:
 				print 'Desired Config does not exist!. Please check config name.'
 
+	def rollBackConfig(self,service,version):
+		roll_payload={
+		  "Clusters": {
+		    "desired_service_config_versions": {
+		      "service_name" :service,
+		      "service_config_version" : version,
+		      "service_config_version_note" : "Manual rollback to base configuration"
+		    }	
+		  }
+		}
+		self.commonPut(self.prefix,json.dumps(roll_payload))
+
+
 	def stopService(self,service):
 		stop_payload={'RequestInfo': {'context': 'Stop '+service}, 'ServiceInfo': {'state': 'INSTALLED'}}
 		req_href=json.loads(self.commonPut(self.prefix+'/services/'+service,json.dumps(stop_payload)))['href']
@@ -119,6 +132,7 @@ if __name__=='__main__':
 	s.restartComponent('HIVE/components/HIVE_SERVER_INTERACTIVE')
 	'''
 	pass
+	
 
 
 
