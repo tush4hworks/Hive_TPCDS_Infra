@@ -37,7 +37,7 @@ class hiveUtil:
 		return ''
 
 	def setJDBCUrl(self,conn_str,dbname):
-		self.hs2url=';'.join([conn_str.split(';')[0]+dbname,';'.join(conn_str.split(';')[1:])])
+		self.hs2url="'"+';'.join([conn_str.split(';')[0]+dbname,';'.join(conn_str.split(';')[1:])])+"'"
 
 	def BeelineCommand(self,setting,hiveql,initfile=True):
 		if initfile:
