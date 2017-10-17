@@ -57,11 +57,11 @@ class ambariConfig:
 
 	def rollBackConfig(self,service,version):
 		roll_payload={
-		  "Clusters": {
-		    "desired_service_config_versions": {
-		      "service_name" :service,
-		      "service_config_version" : version,
-		      "service_config_version_note" : "Manual rollback to base configuration"
+		  'Clusters': {
+		    'desired_service_config_versions': {
+		      'service_name' :service,
+		      'service_config_version' : version,
+		      'service_config_version_note' : 'Manual rollback to base configuration'
 		    }	
 		  }
 		}

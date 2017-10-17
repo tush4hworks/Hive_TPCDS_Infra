@@ -129,8 +129,6 @@ class controls:
 	def fetchParams(self,fileloc):
 		"""Parse input json"""
 		iparse=InputParser.parseInput(fileloc)
-		for setting in iparse.specified_settings():
-			self.addHiveSettings(setting['name'],setting['config'])
 		self.numRuns=iparse.numRuns()
 		self.conn_str=iparse.conn_str()
 		self.db=iparse.db()
@@ -138,6 +136,9 @@ class controls:
 		self.rollBack=iparse.rollBack()
 		if self.rollBack:
 			self.base_version=iparse.base_version()
+		for setting in iparse.specified_settings():
+			self.addHiveSettings(setting['name'],setting['config'])
+		
 
 if __name__=='__main__':
 	C=controls('localhost','DPH')

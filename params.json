@@ -3,7 +3,7 @@
     "numRuns": 1,
     "database": "tpcds_bin_partitioned_orc_100",
     "enableRollBack":"true",
-    "base_version":"151",
+    "base_version":151,
     "queries":["query12.sql","query13.sql"],
     "connection_url":"jdbc:hive2://c01s03.hadoop.local:2181,c01s02.hadoop.local:2181,c01s01.hadoop.local:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2-hive2",
     "settings": [
