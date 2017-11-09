@@ -99,15 +99,14 @@ class controls:
 					if setting in self.hive.viaAmbari.keys():
 						if currSet and self.rollBack:
 							self.logger.warn('+ Rolling back to base version before making changes for setting '+currSet+ '+')
-							self.modconf.rollBackConfig('HIVE',self.base_version) 
+							self.modconf.rollBackConfig(self.rollBack_service,self.base_version) 
 							self.logger.info('- Rolled back to base version before making changes for setting '+currSet+ '-')
 							force_restart=True
 						self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
 						self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'],force_restart)
 					self.logger.info('Starting execution with below configurations for '+setting)
-					self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-site'),indent=4,sort_keys=True))
-					self.logger.info(json.dumps(self.modconf.getConfig('tez-interactive-site'),indent=4,sort_keys=True))
-					self.logger.info(json.dumps(self.modconf.getConfig('hive-interactive-env'),indent=4,sort_keys=True))
+					for toPrint in self.printer:
+						self.logger.info(json.dumps(self.modconf.getConfig(toPrint),indent=4,sort_keys=True))
 					currSet=setting
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
 				for i in xrange(numRuns):
@@ -135,9 +134,11 @@ class controls:
 		self.conn_str=iparse.conn_str()
 		self.db=iparse.db()
 		self.queries=iparse.queries()
+		self.printer=iparse.printer()
 		self.rollBack=iparse.rollBack()
 		if self.rollBack:
 			self.base_version=iparse.base_version()
+			self.rollBack_service=iparse.rollBack_service()
 		for setting in iparse.specified_settings():
 			self.addHiveSettings(setting['name'],setting['config'])
 		

@@ -17,6 +17,9 @@ class parseInput:
 	def db(self):
 		return self.params['wrap']['database']
 
+	def printer(self):
+		return self.params['wrap']['printer']
+
 	def queries(self):
 		return self.params['wrap']['queries']
 
@@ -29,6 +32,9 @@ class parseInput:
 
 	def conn_str(self):
 		return self.params['wrap']['connection_url']
+
+	def rollBack_service(self):
+		return self.params['wrap']['rollBackService']
 
 
 
