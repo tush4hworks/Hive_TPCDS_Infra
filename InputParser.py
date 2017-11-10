@@ -27,14 +27,19 @@ class parseInput:
 		return (self.params['wrap']['enableRollBack'].lower()=='true')
 
 	def base_version(self):
-		if 'base_version' in self.params['wrap'].keys():
-			return self.params['wrap']['base_version']
+		return self.params['wrap']['base_version']
 
 	def conn_str(self):
 		return self.params['wrap']['connection_url']
 
 	def rollBack_service(self):
 		return self.params['wrap']['rollBackService']
+
+	def clusterInfo(self):
+		return [self.params['wrap']['cluster']['host'],self.params['wrap']['cluster']['clustername'],self.params['wrap']['cluster']['user'],self.params['wrap']['cluster']['password']]
+
+	def hiveDirs(self):
+		return [self.params['wrap']['cluster']['queryDir'],self.params['wrap']['cluster']['initDir'] if 'initDir' in self.params['wrap']['cluster'].keys() else None]
 
 
 

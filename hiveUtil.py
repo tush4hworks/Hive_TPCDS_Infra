@@ -5,13 +5,12 @@ from collections import defaultdict
 
 class hiveUtil:
 
-	queryDir='/home/hdfs/hive-testbench/sample-queries-tpcds'
-	initDir='/home/hdfs/llap/TandE/llap_settings'
-
-	def __init__(self):
+	def __init__(self,queryDir,initDir=None):
 		self.hivetrials=defaultdict(lambda:{})
 		self.viaAmbari=defaultdict(lambda:defaultdict(lambda:{}))
 		self.restarts=defaultdict(lambda:defaultdict(lambda:[]))
+		self.queryDir=queryDir
+		self.initDir=initDir
 
 	def addSettings(self,name,setting):
 		self.hivetrials[name]=setting
@@ -25,10 +24,10 @@ class hiveUtil:
 			self.restarts[name][key]=setting[key]
 
 	def getInitFile(self,setting):
-		return '/'.join([hiveUtil.initDir,setting])
+		return '/'.join([self.initDir,setting])
 
 	def getQueryFile(self,hiveql):
-		return '/'.join([hiveUtil.queryDir,hiveql])
+		return '/'.join([self.queryDir,hiveql])
 
 	def getHiveConfString(self,setting):
 		if setting in self.hivetrials.keys():

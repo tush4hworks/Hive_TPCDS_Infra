@@ -7,12 +7,12 @@ import time
 
 class ambariConfig:
 
-	def __init__(self,host,cluster,isSecure=False,admin_princ=None,admin_pass=None):
+	def __init__(self,host,cluster,user,password,isSecure=False,admin_princ=None,admin_pass=None):
 		self.headers={'X-Requested-By':'ambari'}
 		self.host=host
 		self.cluster=cluster
 		self.prefix='http://'+host+':8080/api/v1/clusters/'+cluster
-		self.auth=HTTPBasicAuth('admin', 'admin')
+		self.auth=HTTPBasicAuth(user,password)
 
 	def commonGet(self,url):
 		resp=requests.get(url,headers=self.headers,auth=self.auth)

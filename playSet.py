@@ -16,16 +16,17 @@ class controls:
 	failed_regex=r'(FAILED|ERROR)'
 	dag_regex=r'100%\s+ELAPSED TIME:\s+\d+.\d+\s+s'
 
-	def __init__(self,host,cluster):
+	def __init__(self,jsonFile):
 		"""Init Function for class controls"""
 		FORMAT = '%(asctime)-s-%(levelname)s-%(message)s'
 		logging.basicConfig(format=FORMAT,filename='hivetests.log',filemode='w',level='INFO')
 		logging.getLogger("requests").setLevel(logging.WARNING)
 		self.logger=logging.getLogger(__name__)
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
-		self.hive=hiveUtil.hiveUtil()
+		self.fetchParams(jsonFile)
+		self.hive=hiveUtil.hiveUtil(self.queryDir,self.initDir)
 		self.hiveconfs=[]
-		self.modconf=modifyConfig.ambariConfig(host,cluster)
+		self.modconf=modifyConfig.ambariConfig(self.host,self.clustername,self.user,self.password)
 
 	def addResult(self,queryOut,dbname,setting,hiveql):
 		"""Parse beeline output"""
@@ -35,11 +36,11 @@ class controls:
 				return
 		self.results[dbname][hiveql][setting].append('NA')
 
-	def dumpResultsToCsv(self,numRuns):
+	def dumpResultsToCsv(self):
 		"""Create CSV"""
 		self.logger.info(self.results)
 		with open('hiveResults.csv','w+') as f:
-			f.write(','.join(['DB','QUERY',','.join([','.join(item) for item in [[hiveconf]*numRuns for hiveconf in self.hiveconfs]])])+'\n')
+			f.write(','.join(['DB','QUERY',','.join([','.join(item) for item in [[hiveconf]*self.numRuns for hiveconf in self.hiveconfs]])])+'\n')
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
 					f.write(','.join([db,ql,','.join([','.join([str(exec_time) for exec_time in self.results[db][ql][hiveconf]]) for hiveconf in self.hiveconfs])])+'\n')
@@ -130,6 +131,8 @@ class controls:
 	def fetchParams(self,fileloc):
 		"""Parse input json"""
 		iparse=InputParser.parseInput(fileloc)
+		self.host,self.clustername,self.user,self.password=iparse.clusterInfo()
+		self.queryDir,self.initDir=iparse.hiveDirs()
 		self.numRuns=iparse.numRuns()
 		self.conn_str=iparse.conn_str()
 		self.db=iparse.db()
@@ -140,12 +143,10 @@ class controls:
 			self.base_version=iparse.base_version()
 			self.rollBack_service=iparse.rollBack_service()
 		for setting in iparse.specified_settings():
-			self.addHiveSettings(setting['name'],setting['config'])
-		
+			self.addHiveSettings(setting['name'],setting['config'])		
 
 if __name__=='__main__':
-	C=controls('localhost','DPH')
-	C.fetchParams('params.json')
+	C=controls('params.json')
 	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,False)
-	C.dumpResultsToCsv(C.numRuns)
+	C.dumpResultsToCsv()
 	C.runAnalysis()

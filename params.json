@@ -1,5 +1,13 @@
 {
   "wrap": {
+    "cluster":{
+      "host":"localhost",
+      "clustername":"DPH",
+      "user":"admin",
+      "password":"admin",
+      "queryDir":"/home/hdfs/hive-testbench/sample-queries-tpcds",
+      "initDir":"/home/hdfs/llap/TandE/llap_settings"
+      },
     "numRuns": 1,
     "database": "tpcds_bin_partitioned_orc_100",
     "printer":["hive-interactive-site","tez-interactive-site","hive-interactive-env"],
