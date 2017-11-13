@@ -24,9 +24,7 @@ class controls:
 		self.logger=logging.getLogger(__name__)
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 		self.fetchParams(jsonFile)
-		self.hive=hiveUtil.hiveUtil(self.queryDir,self.initDir)
 		self.hiveconfs=[]
-		self.modconf=modifyConfig.ambariConfig(self.host,self.clustername,self.user,self.password)
 
 	def addResult(self,queryOut,dbname,setting,hiveql):
 		"""Parse beeline output"""
@@ -131,8 +129,12 @@ class controls:
 	def fetchParams(self,fileloc):
 		"""Parse input json"""
 		iparse=InputParser.parseInput(fileloc)
-		self.host,self.clustername,self.user,self.password=iparse.clusterInfo()
-		self.queryDir,self.initDir=iparse.hiveDirs()
+		host,clustername,user,password=iparse.clusterInfo()
+		#initializing conf object
+		self.modconf=modifyConfig.ambariConfig(host,clustername,user,password)
+		queryDir,initDir=iparse.hiveDirs()
+		#initializing hiveUtil object
+		self.hive=hiveUtil.hiveUtil(queryDir,initDir)
 		self.numRuns=iparse.numRuns()
 		self.conn_str=iparse.conn_str()
 		self.db=iparse.db()
