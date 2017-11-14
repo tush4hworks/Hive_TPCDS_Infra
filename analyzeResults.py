@@ -60,7 +60,7 @@ class analyze:
 					for ql in self.results[db].keys():
 						for setting in self.results[db][ql].keys():
 							for i in range(len(self.results[db][ql][setting])):
-								f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]]))
+								f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]])+'\n')
 		status,out=commands.getstatusouput('hadoop fs -put times.csv /tmp')
 
 
