@@ -1,5 +1,6 @@
 import sys
 from collections import defaultdict
+import commands
 
 class analyze:
 
@@ -51,6 +52,17 @@ class analyze:
 				self.f.write(','.join([setting,str(slist.count(setting))])+'\n')
 		except Exception as e:
 			print e.__str__()
+
+	def dumpToZeppelinInput(self):
+		with open('times.csv','w+') as f:
+			try:
+				for db in self.results.keys():
+					for ql in self.results[db].keys():
+						for setting in self.results[db][ql].keys():
+							for i in range(len(self.results[db][ql][setting])):
+								f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]]))
+		status,out=commands.getstatusouput('hadoop fs -put times.csv /tmp')
+
 
 	def closeFile(self):
 		self.f.close()
