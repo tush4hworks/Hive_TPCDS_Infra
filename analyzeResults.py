@@ -54,14 +54,17 @@ class analyze:
 			print e.__str__()
 
 	def dumpToZeppelinInput(self):
-		with open('times.csv','w+') as f:
-			try:
-				for db in self.results.keys():
-					for ql in self.results[db].keys():
-						for setting in self.results[db][ql].keys():
-							for i in range(len(self.results[db][ql][setting])):
-								f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]])+'\n')
-		status,out=commands.getstatusouput('hadoop fs -put times.csv /tmp')
+		try:
+			with open('times.csv','w+') as f:
+				try:
+					for db in self.results.keys():
+						for ql in self.results[db].keys():
+							for setting in self.results[db][ql].keys():
+								for i in range(len(self.results[db][ql][setting])):
+									f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]])+'\n')
+			commands.getstatusouput('hadoop fs -put times.csv /tmp')
+		except Exception as e:
+			print e.__str__()
 
 
 	def closeFile(self):
