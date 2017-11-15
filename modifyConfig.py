@@ -79,6 +79,8 @@ class ambariConfig:
 		req_href=json.loads(self.commonPut(self.prefix+'/services/'+service,json.dumps(start_payload)))['href']
 		while not (json.loads(self.commonGet(req_href))['Requests']['request_status']=='COMPLETED'):
 			time.sleep(5)
+		#Giving Buffer
+		time.sleep(60)
 
 	def stopComponent(self,comp):
 		stop_payload={'RequestInfo': {'context': 'Stop '+comp}, 'ServiceComponentInfo': {'state': 'INSTALLED'}}
@@ -91,6 +93,8 @@ class ambariConfig:
 		req_href=json.loads(self.commonPut(self.prefix+'/services/'+comp,json.dumps(start_payload)))['href']
 		while not (json.loads(self.commonGet(req_href))['Requests']['request_status']=='COMPLETED'):
 			time.sleep(5)
+		#Giving Buffer
+		time.sleep(60)
 
 	def restartComponent(self,comp):
 		self.stopComponent(comp)
