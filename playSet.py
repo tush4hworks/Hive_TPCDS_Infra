@@ -3,12 +3,15 @@ import subprocess
 import re
 from collections import defaultdict
 import itertools
+import json
+import threading
 import hiveUtil
 import logging
 import modifyConfig
 import analyzeResults
 import InputParser
-import json
+import notes
+
 
 class controls:
 
@@ -41,6 +44,21 @@ class controls:
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
 					f.write(','.join([db,ql,','.join([','.join([str(exec_time) for exec_time in self.results[db][ql][hiveconf]]) for hiveconf in self.hiveconfs])])+'\n')
+
+	def toZeppelinAndTrigger(self):
+		try:
+			subprocess.check_output('hadoop fs -rm '+self.zepInputFile,stderr=subprocess.STDOUT,shell=True)
+			with open(self.zepInputFile,'w+') as f:
+				try:
+					for db in self.results.keys():
+						for ql in self.results[db].keys():
+							for setting in self.results[db][ql].keys():
+								for i in range(len(self.results[db][ql][setting])):
+									f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]])+'\n')
+			subprocess.check_output('hadoop fs -put'+self.zepInputFile+' /tmp',stderr=subprocess.STDOUT,shell=True)
+			self.zepObj.runParagraphs(self.zeppelinNote)
+		except Exception as e:
+			self.logger.info(e.__str__())
 
 	def runAnalysis(self):
 		"""Run basic analysis, sort by total time taken, gather best configuration for every query"""
@@ -85,6 +103,13 @@ class controls:
 				self.modconf.restartComponent(component)
 				self.logger.info('- Restarted '+component+' -')
 
+	def updateNote(self):
+		try:
+			t=threading.Thread(target=toZeppelinAndTrigger,args=())
+			t.start()
+		except Exception as e:
+			self.logger.info(e.__str__())
+
 	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=True):
 		"""Main entry function to run TPCDS suite"""
 		self.hive.setJDBCUrl(self.conn_str,dbname)
@@ -110,6 +135,7 @@ class controls:
 				for i in xrange(numRuns):
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
 				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
+				self.updateNote()
 			except Exception as e:
 				self.logger.error(e.__str__())
 				self.logger.warn('- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -')
@@ -129,11 +155,9 @@ class controls:
 		"""Parse input json"""
 		iparse=InputParser.parseInput(fileloc)
 		host,clustername,user,password=iparse.clusterInfo()
-		#initializing conf object
 		self.modconf=modifyConfig.ambariConfig(host,clustername,user,password)
 		queryDir,initDir=iparse.hiveDirs()
 		self.hiveconfs=[]
-		#initializing hiveUtil object
 		self.hive=hiveUtil.hiveUtil(queryDir,initDir)
 		self.numRuns=iparse.numRuns()
 		self.conn_str=iparse.conn_str()
@@ -145,7 +169,12 @@ class controls:
 			self.base_version=iparse.base_version()
 			self.rollBack_service=iparse.rollBack_service()
 		for setting in iparse.specified_settings():
-			self.addHiveSettings(setting['name'],setting['config'])		
+			self.addHiveSettings(setting['name'],setting['config'])	
+		if iparse.whetherZeppelin():
+			host,user,password,note,zepInputFile=iparse.noteInfo()
+			self.zeppelinNote=note
+			self.zepInputFile=zepInputFile
+			self.zepObj=notes(host,user,password)
 
 if __name__=='__main__':
 	C=controls('params.json')

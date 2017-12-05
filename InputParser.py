@@ -41,6 +41,11 @@ class parseInput:
 	def hiveDirs(self):
 		return [self.params['wrap']['cluster']['queryDir'],self.params['wrap']['cluster']['initDir'] if 'initDir' in self.params['wrap']['cluster'].keys() else None]
 
+	def whetherZeppelin(self):
+		return (self.params['wrap']['zeppelin'].lower()=='true')
+
+	def noteInfo(self):
+		return [self.params['wrap']['host'],self.params['wrap']['notebook']['user'],self.params['wrap']['notebook']['password'],self.params['wrap']['notebook']['note'],self.params['wrap']['notebook']['zepInputFile']]
 
 
 
