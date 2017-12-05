@@ -47,17 +47,29 @@ class controls:
 
 	def toZeppelinAndTrigger(self):
 		try:
-			subprocess.check_output('hadoop fs -rm '+self.zepInputFile,stderr=subprocess.STDOUT,shell=True)
+			subprocess.check_output('hadoop fs -rm /tmp'+self.zepInputFile,stderr=subprocess.STDOUT,shell=True)
+		except Exception as e:
+			self.logger.info(e.__str__())
+		try:
 			with open(self.zepInputFile,'w+') as f:
 				for db in self.results.keys():
 					for ql in self.results[db].keys():
 						for setting in self.results[db][ql].keys():
 							for i in range(len(self.results[db][ql][setting])):
 								f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]])+'\n')
+		except Exception as e:
+			self.logger.info(e.__str__())
+		try:			
 			subprocess.check_output('hadoop fs -put'+self.zepInputFile+' /tmp',stderr=subprocess.STDOUT,shell=True)
+		except Exception as e:
+			self.logger.info(e.__str__())
+		try:
+			self.zepObj.zepLogin()
 			self.zepObj.runParagraphs(self.zeppelinNote)
 		except Exception as e:
 			self.logger.info(e.__str__())
+
+		
 
 	def runAnalysis(self):
 		"""Run basic analysis, sort by total time taken, gather best configuration for every query"""
@@ -104,7 +116,7 @@ class controls:
 
 	def updateNote(self):
 		try:
-			t=threading.Thread(target=toZeppelinAndTrigger,args=())
+			t=threading.Thread(target=self.toZeppelinAndTrigger,args=())
 			t.start()
 		except Exception as e:
 			self.logger.info(e.__str__())
