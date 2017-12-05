@@ -17,10 +17,10 @@ class zepInt:
 		return resp.json()
 
 	def runParagraphs(self,notebook):
-		for note in self.getAllNotebooks['body']:
+		for note in self.getAllNotebooks()['body']:
 			if note['name']==notebook:
 				resp=requests.post(self.url+'/api/notebook/job/'+note['id'],cookies=self.cookie)
-			break
+				break
 
 	def checkIfExist(self,notebook):
 		zepNotes=[note['name'] for note in self.getAllNotebooks()['body']]

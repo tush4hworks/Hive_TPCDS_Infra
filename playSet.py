@@ -47,7 +47,7 @@ class controls:
 
 	def toZeppelinAndTrigger(self):
 		try:
-			subprocess.check_output('hadoop fs -rm /tmp'+self.zepInputFile,stderr=subprocess.STDOUT,shell=True)
+			subprocess.check_output('hadoop fs -rm /tmp/'+self.zepInputFile,stderr=subprocess.STDOUT,shell=True)
 		except Exception as e:
 			self.logger.info(e.__str__())
 		try:
@@ -56,11 +56,12 @@ class controls:
 					for ql in self.results[db].keys():
 						for setting in self.results[db][ql].keys():
 							for i in range(len(self.results[db][ql][setting])):
-								f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]])+'\n')
+								f.write(','.join([ql,setting,str(i+1),str(self.results[db][ql][setting][i])
+									])+'\n')
 		except Exception as e:
 			self.logger.info(e.__str__())
 		try:			
-			subprocess.check_output('hadoop fs -put'+self.zepInputFile+' /tmp',stderr=subprocess.STDOUT,shell=True)
+			subprocess.check_output('hadoop fs -put '+self.zepInputFile+' /tmp',stderr=subprocess.STDOUT,shell=True)
 		except Exception as e:
 			self.logger.info(e.__str__())
 		try:
