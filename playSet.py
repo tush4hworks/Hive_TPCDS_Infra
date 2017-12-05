@@ -119,6 +119,7 @@ class controls:
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if not(currSet) or not(setting==currSet):
 					force_restart=False
+					updateZeppelin=True
 					if setting in self.hive.viaAmbari.keys():
 						if currSet and self.rollBack:
 							self.logger.warn('+ Rolling back to base version before making changes for setting '+currSet+ '+')
@@ -135,7 +136,8 @@ class controls:
 				for i in xrange(numRuns):
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
 				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
-				self.updateNote()
+				if updateZeppelin:
+					self.updateNote()
 			except Exception as e:
 				self.logger.error(e.__str__())
 				self.logger.warn('- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -')
