@@ -49,12 +49,11 @@ class controls:
 		try:
 			subprocess.check_output('hadoop fs -rm '+self.zepInputFile,stderr=subprocess.STDOUT,shell=True)
 			with open(self.zepInputFile,'w+') as f:
-				try:
-					for db in self.results.keys():
-						for ql in self.results[db].keys():
-							for setting in self.results[db][ql].keys():
-								for i in range(len(self.results[db][ql][setting])):
-									f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]])+'\n')
+				for db in self.results.keys():
+					for ql in self.results[db].keys():
+						for setting in self.results[db][ql].keys():
+							for i in range(len(self.results[db][ql][setting])):
+								f.write(','.join([ql,setting,str(i+1),self.results[db][ql][setting][i]])+'\n')
 			subprocess.check_output('hadoop fs -put'+self.zepInputFile+' /tmp',stderr=subprocess.STDOUT,shell=True)
 			self.zepObj.runParagraphs(self.zeppelinNote)
 		except Exception as e:
