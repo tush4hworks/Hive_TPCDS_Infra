@@ -45,7 +45,7 @@ class parseInput:
 		return (self.params['wrap']['zeppelin'].lower()=='true')
 
 	def noteInfo(self):
-		return [self.params['wrap']['host'],self.params['wrap']['notebook']['user'],self.params['wrap']['notebook']['password'],self.params['wrap']['notebook']['note'],self.params['wrap']['notebook']['zepInputFile']]
+		return [self.params['wrap']['notebook']['host'],self.params['wrap']['notebook']['user'],self.params['wrap']['notebook']['password'],self.params['wrap']['notebook']['note'],self.params['wrap']['notebook']['zepInputFile']]
 
 
 

@@ -175,7 +175,7 @@ class controls:
 			host,user,password,note,zepInputFile=iparse.noteInfo()
 			self.zeppelinNote=note
 			self.zepInputFile=zepInputFile
-			self.zepObj=notes(host,user,password)
+			self.zepObj=notes.zepInt(host,user,password)
 
 if __name__=='__main__':
 	C=controls('params.json')
