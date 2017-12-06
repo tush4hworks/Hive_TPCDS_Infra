@@ -128,6 +128,7 @@ class controls:
 		currSet=None
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
+				updateZeppelin=False
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if not(currSet) or not(setting==currSet):
 					force_restart=False
