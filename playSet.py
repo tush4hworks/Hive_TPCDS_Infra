@@ -122,17 +122,17 @@ class controls:
 		except Exception as e:
 			self.logger.info(e.__str__())
 
-	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=True):
+	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=False,runZep=False):
 		"""Main entry function to run TPCDS suite"""
 		self.hive.setJDBCUrl(self.conn_str,dbname)
 		currSet=None
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
-				updateZeppelin=False
+				updateZeppelin=False and runZep
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if not(currSet) or not(setting==currSet):
 					force_restart=False
-					updateZeppelin=True
+					updateZeppelin=True and runZep
 					if setting in self.hive.viaAmbari.keys():
 						if currSet and self.rollBack:
 							self.logger.warn('+ Rolling back to base version before making changes for setting '+currSet+ '+')
@@ -195,6 +195,6 @@ class controls:
 
 if __name__=='__main__':
 	C=controls('params.json')
-	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,False)
+	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,False,True)
 	C.dumpResultsToCsv()
 	C.runAnalysis()
