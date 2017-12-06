@@ -9,6 +9,7 @@ class hiveUtil:
 		self.hivetrials=defaultdict(lambda:{})
 		self.viaAmbari=defaultdict(lambda:defaultdict(lambda:{}))
 		self.restarts=defaultdict(lambda:defaultdict(lambda:[]))
+		self.initFile={}
 		self.queryDir=queryDir
 		self.initDir=initDir
 
@@ -23,8 +24,11 @@ class hiveUtil:
 		for key in setting.keys():
 			self.restarts[name][key]=setting[key]
 
+	def addInitFile(self,name,setFile):
+		self.initFile[name]=setFile
+
 	def getInitFile(self,setting):
-		return '/'.join([self.initDir,setting])
+		return '/'.join([self.initDir,self.initFile[setting]])
 
 	def getQueryFile(self,hiveql):
 		return '/'.join([self.queryDir,hiveql])

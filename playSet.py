@@ -164,6 +164,8 @@ class controls:
 			self.hive.addAmbariConf(name,runSettings['ambari'])
 		if 'restart' in runSettings.keys():
 			self.hive.addRestart(name,runSettings['restart'])
+		if 'initfile' in runSettings.keys():
+			self.hive.addInitFile(name,runSettings['initfile'])
 		self.hiveconfs.append(name)
 
 	def fetchParams(self,fileloc):
