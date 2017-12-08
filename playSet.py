@@ -69,8 +69,7 @@ class controls:
 			self.zepObj.runParagraphs(self.zeppelinNote)
 		except Exception as e:
 			self.logger.info(e.__str__())
-
-		
+	
 
 	def runAnalysis(self):
 		"""Run basic analysis, sort by total time taken, gather best configuration for every query"""
@@ -97,6 +96,15 @@ class controls:
 			if hasattr(e,'output'):
 				with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
 					f.write(e.output)
+
+	def sysConf(self,cmds,setting):
+		for cmd in cmds:
+			try:
+				self.logger.info('+ Running '+cmd+' for setting '+setting)
+				subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
+				self.logger.info('- Finished executing command '+cmd)
+			except Exception as e:
+				self.logger.error('- Finished executing command with exception '+cmd)
 		
 	def modifySettingsAndRestart(self,ambariSetting,services,components,force_restart=False):
 		"""Calling ambari API to change configuration and restart services/components"""
@@ -128,11 +136,13 @@ class controls:
 		currSet=None
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
-				updateZeppelin=False and runZep
+				updateZeppelin=False
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if not(currSet) or not(setting==currSet):
 					force_restart=False
 					updateZeppelin=True and runZep
+					if setting in self.hive.sysMod.keys():
+						self.sysConf(self.hive.sysMod[setting],setting)
 					if setting in self.hive.viaAmbari.keys():
 						if currSet and self.rollBack:
 							self.logger.warn('+ Rolling back to base version before making changes for setting '+currSet+ '+')
@@ -166,6 +176,8 @@ class controls:
 			self.hive.addRestart(name,runSettings['restart'])
 		if 'initfile' in runSettings.keys():
 			self.hive.addInitFile(name,runSettings['initfile'])
+		if 'system' in runSettings.keys():
+			self.hive.addSysMod(name,runSettings['system'])
 		self.hiveconfs.append(name)
 
 	def fetchParams(self,fileloc):

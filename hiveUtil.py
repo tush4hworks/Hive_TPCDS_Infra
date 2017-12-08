@@ -10,6 +10,7 @@ class hiveUtil:
 		self.viaAmbari=defaultdict(lambda:defaultdict(lambda:{}))
 		self.restarts=defaultdict(lambda:defaultdict(lambda:[]))
 		self.initFile={}
+		self.sysMod={}
 		self.queryDir=queryDir
 		self.initDir=initDir
 
@@ -23,6 +24,9 @@ class hiveUtil:
 	def addRestart(self,name,setting):
 		for key in setting.keys():
 			self.restarts[name][key]=setting[key]
+
+	def addSysMod(self,name,setting):
+		self.sysMod[name]=setting
 
 	def addInitFile(self,name,setFile):
 		self.initFile[name]=setFile

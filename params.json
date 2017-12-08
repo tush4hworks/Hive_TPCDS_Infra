@@ -41,6 +41,7 @@
               "llap_heap_size": "40000"
             }
           },
+          "system":[],
           "hiveconf": {
             "hive.auto.convert.join": "true",
             "hive.auto.convert.join.noconditionaltask": "true",
@@ -77,6 +78,7 @@
               "llap_heap_size": "30000"
             }
           },
+          "system":[],
           "hiveconf": {
             "hive.auto.convert.join": "true",
             "hive.auto.convert.join.noconditionaltask": "true",
