@@ -42,7 +42,7 @@ class controls:
 			if re.search(controls.success_regex,line,re.I):
 				self.results[dbname][hiveql][setting].append(float(re.search(controls.success_regex,line,re.I).group().split('seconds')[0].strip()))
 				if re.search(controls.numrows_regex,line,re.I):
-					self.rowsOnQuery[hiveql]=re.split('\s+',line)[0]
+					self.rowsOnQuery[hiveql]=re.sub(',','',re.split('\s+',line)[0])
 				return
 		self.results[dbname][hiveql][setting].append('NA')
 
@@ -223,6 +223,6 @@ class controls:
 
 if __name__=='__main__':
 	C=controls('params.json')
-	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,self.runZep)
+	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,C.runZep)
 	C.dumpResultsToCsv()
 	C.runAnalysis()
