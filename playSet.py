@@ -18,7 +18,8 @@ class controls:
 	success_regex=r'([\d\.]+)\s+seconds'
 	failed_regex=r'(FAILED|ERROR)'
 	dag_regex=r'100%\s+ELAPSED TIME:\s+\d+.\d+\s+s'
-
+	numrows_regex=r'rows selected'
+	
 	def __init__(self,jsonFile):
 		"""Init Function for class controls"""
 		FORMAT = '%(asctime)-s-%(levelname)s-%(message)s'
@@ -26,6 +27,7 @@ class controls:
 		logging.getLogger("requests").setLevel(logging.WARNING)
 		self.logger=logging.getLogger(__name__)
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
+		self.rowsOnQuery=defaultdict(lambda:'NA')
 		self.fetchParams(jsonFile)
 
 	def addResult(self,queryOut,dbname,setting,hiveql):
@@ -33,17 +35,20 @@ class controls:
 		for line in queryOut.split('\n')[-1:0:-1]:
 			if re.search(controls.success_regex,line,re.I):
 				self.results[dbname][hiveql][setting].append(float(re.search(controls.success_regex,line,re.I).group().split('seconds')[0].strip()))
-				return
+				if re.search(controls.numrows_regex,line,re.I):
+					self.rowsOnQuery[hiveql]=re.split('\s+',line)[0]
+			return
 		self.results[dbname][hiveql][setting].append('NA')
+
 
 	def dumpResultsToCsv(self):
 		"""Create CSV"""
 		self.logger.info(self.results)
 		with open('hiveResults.csv','w+') as f:
-			f.write(','.join(['DB','QUERY',','.join([','.join(item) for item in [[hiveconf]*self.numRuns for hiveconf in self.hiveconfs]])])+'\n')
+			f.write(','.join(['DB','QUERY','ROWS',','.join([','.join(item) for item in [[hiveconf]*self.numRuns for hiveconf in self.hiveconfs]])])+'\n')
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
-					f.write(','.join([db,ql,','.join([','.join([str(exec_time) for exec_time in self.results[db][ql][hiveconf]]) for hiveconf in self.hiveconfs])])+'\n')
+					f.write(','.join([db,ql,self.rowsOnQuery[ql],','.join([','.join([str(exec_time) for exec_time in self.results[db][ql][hiveconf]]) for hiveconf in self.hiveconfs])])+'\n')
 
 	def toZeppelinAndTrigger(self):
 		try:
@@ -130,7 +135,7 @@ class controls:
 		except Exception as e:
 			self.logger.info(e.__str__())
 
-	def runTests(self,dbname,settings,hiveqls,numRuns,initfile=False,runZep=False):
+	def runTests(self,dbname,settings,hiveqls,numRuns,runZep=False):
 		"""Main entry function to run TPCDS suite"""
 		self.hive.setJDBCUrl(self.conn_str,dbname)
 		currSet=None
@@ -155,7 +160,7 @@ class controls:
 					for toPrint in self.printer:
 						self.logger.info(json.dumps(self.modconf.getConfig(toPrint),indent=4,sort_keys=True))
 					currSet=setting
-				beelineCmd=self.hive.BeelineCommand(setting,hiveql,initfile)
+				beelineCmd=self.hive.BeelineCommand(setting,hiveql,True if setting in self.hive.initFile.keys() else False)
 				for i in xrange(numRuns):
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
 				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
@@ -198,8 +203,10 @@ class controls:
 			self.base_version=iparse.base_version()
 			self.rollBack_service=iparse.rollBack_service()
 		for setting in iparse.specified_settings():
-			self.addHiveSettings(setting['name'],setting['config'])	
+			self.addHiveSettings(setting['name'],setting['config'])
+		self.runZep=False
 		if iparse.whetherZeppelin():
+			self.runZep=True
 			host,user,password,note,zepInputFile=iparse.noteInfo()
 			self.zeppelinNote=note
 			self.zepInputFile=zepInputFile
@@ -207,6 +214,6 @@ class controls:
 
 if __name__=='__main__':
 	C=controls('params.json')
-	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,False,True)
+	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,self.runZep)
 	C.dumpResultsToCsv()
 	C.runAnalysis()
