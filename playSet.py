@@ -11,6 +11,7 @@ import modifyConfig
 import analyzeResults
 import InputParser
 import notes
+import datetime
 
 
 class controls:
@@ -28,27 +29,32 @@ class controls:
 		self.logger=logging.getLogger(__name__)
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 		self.rowsOnQuery=defaultdict(lambda:'NA')
+		self.start_end=defaultdict(lambda:['NA','NA'])
 		self.fetchParams(jsonFile)
 
-	def addResult(self,queryOut,dbname,setting,hiveql):
+	def getDateTime(self):
+		return datetime.datetime.now().strftime("%m|%d-%H:%M:%S")
+
+	def addResult(self,queryOut,dbname,setting,hiveql,startEnd):
 		"""Parse beeline output"""
+		self.start_end[''.join([dbname,hiveql,setting,str(len(self.results[dbname][hiveql][setting]))])]=startEnd
 		for line in queryOut.split('\n')[-1:0:-1]:
 			if re.search(controls.success_regex,line,re.I):
 				self.results[dbname][hiveql][setting].append(float(re.search(controls.success_regex,line,re.I).group().split('seconds')[0].strip()))
 				if re.search(controls.numrows_regex,line,re.I):
 					self.rowsOnQuery[hiveql]=re.split('\s+',line)[0]
-			return
+				return
 		self.results[dbname][hiveql][setting].append('NA')
 
 
 	def dumpResultsToCsv(self):
 		"""Create CSV"""
 		self.logger.info(self.results)
-		with open('hiveResults.csv','w+') as f:
-			f.write(','.join(['DB','QUERY','ROWS',','.join([','.join(item) for item in [[hiveconf]*self.numRuns for hiveconf in self.hiveconfs]])])+'\n')
+		with open(self.getDateTime()+'hiveResults.csv','w+') as f:
+			f.write(','.join(['DB','QUERY','ROWS',','.join([','.join(item) for item in [[hiveconf]*self.numRuns*3 for hiveconf in self.hiveconfs]])])+'\n')
 			for db in self.results.keys():
 				for ql in self.results[db].keys():
-					f.write(','.join([db,ql,self.rowsOnQuery[ql],','.join([','.join([str(exec_time) for exec_time in self.results[db][ql][hiveconf]]) for hiveconf in self.hiveconfs])])+'\n')
+					f.write(','.join([db,ql,self.rowsOnQuery[ql],','.join([','.join([','.join(self.start_end[''.join([db,ql,hiveconf,str(i)])]+[str(self.results[db][ql][hiveconf][i])]) for i in range(len(self.results[db][ql][hiveconf]))]) for hiveconf in self.hiveconfs])])+'\n')
 
 	def toZeppelinAndTrigger(self):
 		try:
@@ -88,18 +94,21 @@ class controls:
 
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
 		"""Wrapper to run shell"""
+		start=self.getDateTime()
 		try:
 			self.logger.info('+ Executing command '+cmd)
 			result=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
-			with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
+			end=self.getDateTime()
+			with open('History/'+'_'.join([dbname,hiveql,setting,run,self.getDateTime()]),'w+') as f:
 				f.write(result)
 			self.logger.info('- Finished executing command '+cmd)
-			self.addResult(result,dbname,setting,hiveql)
+			self.addResult(result,dbname,setting,hiveql,[start,end])
 		except Exception as e:
+			end=self.getDateTime()
 			self.logger.error('- Finished executing command with exception '+cmd)
-			self.addResult('NA',dbname,setting,hiveql)
+			self.addResult('NA',dbname,setting,hiveql,[start,end])
 			if hasattr(e,'output'):
-				with open('History/'+'_'.join([dbname,hiveql,setting,run]),'w+') as f:
+				with open('History/'+'_'.join([dbname,hiveql,setting,run,self.getDateTime()]),'w+') as f:
 					f.write(e.output)
 
 	def sysConf(self,cmds,setting):
