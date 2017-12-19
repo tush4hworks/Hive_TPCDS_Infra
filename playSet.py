@@ -12,6 +12,7 @@ import analyzeResults
 import InputParser
 import notes
 import datetime
+import time
 
 
 class controls:
@@ -19,7 +20,7 @@ class controls:
 	success_regex=r'([\d\.]+)\s+seconds'
 	failed_regex=r'(FAILED|ERROR)'
 	dag_regex=r'100%\s+ELAPSED TIME:\s+\d+.\d+\s+s'
-	numrows_regex=r'rows selected'
+	numrows_regex=r'selected'
 	
 	def __init__(self,jsonFile):
 		"""Init Function for class controls"""
@@ -32,7 +33,9 @@ class controls:
 		self.start_end=defaultdict(lambda:['NA','NA'])
 		self.fetchParams(jsonFile)
 
-	def getDateTime(self):
+	def getDateTime(self,epochT=True):
+		if epochT:
+			return str(int(time.time()))
 		return datetime.datetime.now().strftime("%m|%d-%H:%M:%S")
 
 	def addResult(self,queryOut,dbname,setting,hiveql,startEnd):
