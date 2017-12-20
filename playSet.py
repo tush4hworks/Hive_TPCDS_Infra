@@ -33,10 +33,10 @@ class controls:
 		self.start_end=defaultdict(lambda:['NA','NA'])
 		self.fetchParams(jsonFile)
 
-	def getDateTime(self,epochT=True):
+	def getDateTime(self,epochT=False):
 		if epochT:
 			return str(int(time.time()))
-		return datetime.datetime.now().strftime("%m|%d-%H:%M:%S")
+		return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
 	def addResult(self,queryOut,dbname,setting,hiveql,startEnd):
 		"""Parse beeline output"""
