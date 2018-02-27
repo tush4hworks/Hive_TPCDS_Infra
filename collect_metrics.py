@@ -4,42 +4,46 @@ from collections import defaultdict
 import json
 
 class getQueryMetrics:
-	def __init__(self,host,port,query,servicedump,hostdump):
+	def __init__(self,host,port):
 		self.query=query
 		self.prefix='http://{}:{}/ws/v1/timeline/metrics'.format(host,port)
-		self.host_stats=defaultdict(lambda:defaultdict(lambda:'NA'))
-		self.service_stats=defaultdict(lambda:'NA')
-		self.servicedump=servicedump
-		self.hostdump=hostdump
+		self.host_stats=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:'NA')))
+		self.service_stats=defaultdict(lambda:defaultdict(lambda:'NA'))
+		self.ifheaderservice=False
+		self.ifheaderhost=False
 
-	def fetch_stats(self,metricType,metricNames,startTime,endTime,dumpfile,hostname=None,precision=None,,appId=None):
+	def fetch_stats(self,query,metricType,metricNames,startTime,endTime,dumpfile,hostname=None,precision=None,appId=None):
 		url=self.prefix+'?metricNames={}{}{}{}&startTime={}&endTime={}'.format(metricNames,'&appId='+appId if appId else '','&hostname='+hostname if hostname else '','&precision='+precision if precision else '',startTime,endTime)
 		resp=requests.get(url,headers={'Accept':'application/json'})
 		if resp.status_code==200:
-			self.addToMetrics(metricType,json.loads(resp.content)['metrics'])
-		self.dumpStats(metricType,dumpfile)
+			self.addToMetrics(query,metricType,json.loads(resp.content)['metrics'])
+		self.dumptofile(query,metricType,dumpfile)
 
-	def addToMetrics(self,metricType,metricList):
+	def addToMetrics(self,query,metricType,metricList):
 		if metricType=='host':
 			for stat in metricList:
-				self.host_stats[stat['hostname']][stat['metricname']]=stat['metrics'].values()[0]
+				self.host_stats[query][stat['hostname']][stat['metricname']]=stat['metrics'].values()[0]
 		elif metricType=='service':
 			for stat in metricList:
-				self.service_stats[stat['metricname']]=stat['metrics'].values()[0]
+				self.service_stats[query][stat['metricname']]=stat['metrics'].values()[0]
 
-	def dumptofile(self,metricType,dumpfile):
+	def dumptofile(self,query,metricType,dumpfile):
 		if metricType=='host':
-			self.dumpHostStats(self,dumpfile)
+			self.dumpHostStats(query,dumpfile)
 		elif metricType=='service':
-			self.dumpServiceStats(self,dumpfile)
+			self.dumpServiceStats(query,dumpfile)
 	
-	def dumpServiceStats(self,dumpfile):
+	def dumpServiceStats(self,query,dumpfile):
 		with open(dumpfile,'a+') as f:
-			f.write('query,'+','.join(sorted(self.service_stats.keys()))+'\n')
-			f.write(','.join([self.query]+[str(self.service_stats[key]) for key in sorted(self.service_stats.keys())])+'\n')
+			if not self.ifheader:
+				f.write('query,'+','.join(sorted(self.service_stats[query].keys()))+'\n')
+				self.ifheader=True
+			f.write(','.join([query]+[str(self.service_stats[query][key]) for key in sorted(self.service_stats[query].keys())])+'\n')
 
-	def dumpHostStats(self,dumpfile):
+	def dumpHostStats(self,query,dumpfile):
 		with open(dumpfile,'a+') as f:
-			f.write('query,'+','.join(['-'.join([host,metric]) for host in sorted(self.host_stats.keys()) for metric in sorted(self.host_stats[host].keys())])+'\n')
-			f.write(','.join([self.query]+[str(self.host_stats[host][metric]) for host in sorted(self.host_stats.keys()) for metric in sorted(self.host_stats[host].keys())])+'\n')
+			if not self.ifheaderhost:
+				f.write('query,'+','.join(['-'.join([host,metric]) for host in sorted(self.host_stats[query].keys()) for metric in sorted(self.host_stats[query][host].keys())])+'\n')
+				self.ifheaderhost=True
+			f.write(','.join([query]+[str(self.host_stats[query][host][metric]) for host in sorted(self.host_stats[query].keys()) for metric in sorted(self.host_stats[query][host].keys())])+'\n')
 

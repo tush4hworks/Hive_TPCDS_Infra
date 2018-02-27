@@ -48,6 +48,6 @@ class hiveUtil:
 
 	def BeelineCommand(self,setting,hiveql,initfile=True):
 		if initfile:
-			return ' '.join(['beeline','-u',self.hs2url,'-i',self.getInitFile(setting),'-f',self.getQueryFile(hiveql)])+' --hiveconf hive.query.name='+'-'.join([query,setting])
+			return ' '.join(['beeline','-u',self.hs2url,'-i',self.getInitFile(setting),'-f',self.getQueryFile(hiveql)])
 		else:
-			return ' '.join(['beeline','-u',self.hs2url,'-f',self.getQueryFile(hiveql),self.getHiveConfString(setting)])+' --hiveconf hive.query.name='+'-'.join([query,setting])
+			return ' '.join(['beeline','-u',self.hs2url,'-f',self.getQueryFile(hiveql),self.getHiveConfString(setting)])
