@@ -35,16 +35,18 @@ class getQueryMetrics:
 			self.dumpServiceStats(query,dumpfile)
 	
 	def dumpServiceStats(self,query,dumpfile):
-		with open(dumpfile,'a+') as f:
-			if not self.ifheader:
-				f.write('query,'+','.join(sorted(self.service_stats[query].keys()))+'\n')
-				self.ifheader=True
-			f.write(','.join([query]+[str(self.service_stats[query][key]) for key in sorted(self.service_stats[query].keys())])+'\n')
+		if len(self.service_stats[query].keys())>0:
+			with open(dumpfile,'a+') as f:
+				if not self.ifheader:
+					f.write('query,'+','.join(sorted(self.service_stats[query].keys()))+'\n')
+					self.ifheader=True
+				f.write(','.join([query]+[str(self.service_stats[query][key]) for key in sorted(self.service_stats[query].keys())])+'\n')
 
 	def dumpHostStats(self,query,dumpfile):
-		with open(dumpfile,'a+') as f:
-			if not self.ifheaderhost:
-				f.write('query,'+','.join(['-'.join([host,metric]) for host in sorted(self.host_stats[query].keys()) for metric in sorted(self.host_stats[query][host].keys())])+'\n')
-				self.ifheaderhost=True
-			f.write(','.join([query]+[str(self.host_stats[query][host][metric]) for host in sorted(self.host_stats[query].keys()) for metric in sorted(self.host_stats[query][host].keys())])+'\n')
+		if len(self.host_stats[query].keys())>0:
+			with open(dumpfile,'a+') as f:
+				if not self.ifheaderhost:
+					f.write('query,'+','.join(['-'.join([host,metric]) for host in sorted(self.host_stats[query].keys()) for metric in sorted(self.host_stats[query][host].keys())])+'\n')
+					self.ifheaderhost=True
+				f.write(','.join([query]+[str(self.host_stats[query][host][metric]) for host in sorted(self.host_stats[query].keys()) for metric in sorted(self.host_stats[query][host].keys())])+'\n')
 
