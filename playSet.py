@@ -13,6 +13,8 @@ import InputParser
 import notes
 import datetime
 import time
+import computeStats
+import collect_metrics
 
 
 class controls:
@@ -28,9 +30,11 @@ class controls:
 		logging.basicConfig(format=FORMAT,filename='hivetests.log',filemode='w',level='INFO')
 		logging.getLogger("requests").setLevel(logging.WARNING)
 		self.logger=logging.getLogger(__name__)
+		self.stats=statsPerQuery()
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 		self.rowsOnQuery=defaultdict(lambda:'NA')
 		self.start_end=defaultdict(lambda:['NA','NA'])
+		self.containers=defaultdict(lambda:defaultdict(lambda:0))
 		self.fetchParams(jsonFile)
 
 	def getDateTime(self,epochT=False):
@@ -95,19 +99,34 @@ class controls:
 		except Exception as e:
 			self.logger.error(e)
 
+	def addResourceStats(self,startEpoch,endEpoch,query):
+		try:
+			self.logger.info('+ Collecting stats for query '+query)
+			cstat=collect_metrics.getQueryMetrics(self.metricsHost,self.metricsPort,query)
+			for key in self.collection.keys():
+				cstat.fetch_stats(key,self.collection[key]['metrics'],startEpoch,endEpoch,self.collection[key]['dumpfile'],self.collection[key]['hostname'],self.collection[key]['precision'],self.collection[key]['appId'])
+			self.logger.info('- Collected stats for query '+query)
+		except Exception as e:
+			self.logger.info(e.__str__())	
+
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
 		"""Wrapper to run shell"""
 		start=self.getDateTime()
+		startEpoch=str(int(time.time()*1000))
 		try:
 			self.logger.info('+ Executing command '+cmd)
 			result=subprocess.check_output(cmd,stderr=subprocess.STDOUT,shell=True)
 			end=self.getDateTime()
+			endEpoch=str(int(time.time()*1000))
 			with open('History/'+'_'.join([dbname,hiveql,setting,run,self.getDateTime()]),'w+') as f:
 				f.write(result)
 			self.logger.info('- Finished executing command '+cmd)
 			self.addResult(result,dbname,setting,hiveql,[start,end])
+			self.statCollection(startEpoch,endEpoch,hiveql)
 		except Exception as e:
 			end=self.getDateTime()
+			endEpoch=str(int(time.time()*1000))
+			self.statCollection(startEpoch,endEpoch,hiveql)
 			self.logger.error('- Finished executing command with exception '+cmd)
 			self.addResult('NA',dbname,setting,hiveql,[start,end])
 			if hasattr(e,'output'):
@@ -140,9 +159,27 @@ class controls:
 				self.modconf.restartComponent(component)
 				self.logger.info('- Restarted '+component+' -')
 
+	'''
+	def collectStats(self,event,query,setting):
+		containers=0
+		event.wait()
+		while event.isSet():
+			containers=max(self.stats.get_num_containers(),containers)
+			time.sleep(1)
+		self.containers[query][setting]=containers
+	'''
+
+
 	def updateNote(self):
 		try:
 			t=threading.Thread(target=self.toZeppelinAndTrigger,args=())
+			t.start()
+		except Exception as e:
+			self.logger.info(e.__str__())
+
+	def statCollection(self,startEpoch,endEpoch,query):
+		try:
+			t=threading.Thread(target=self.addResourceStats,args=[startEpoch,endEpoch,query])
 			t.start()
 		except Exception as e:
 			self.logger.info(e.__str__())
@@ -151,6 +188,9 @@ class controls:
 		"""Main entry function to run TPCDS suite"""
 		self.hive.setJDBCUrl(self.conn_str,dbname)
 		currSet=None
+		'''
+		event=threading.Event()
+		'''
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
 				updateZeppelin=False
@@ -174,11 +214,19 @@ class controls:
 					currSet=setting
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,True if setting in self.hive.initFile.keys() else False)
 				for i in xrange(numRuns):
+					'''
+					threading.Thread(target=self.collectStats,args=[event,hiveql,setting]).start() 
+					event.set()
+					'''
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
+					'''
+					event.clear()
+					'''
 				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
 				if updateZeppelin:
 					self.updateNote()
 			except Exception as e:
+				#event.clear()
 				self.logger.error(e.__str__())
 				self.logger.warn('- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -')
 
@@ -211,6 +259,8 @@ class controls:
 		self.queries=iparse.queries()
 		self.printer=iparse.printer()
 		self.rollBack=iparse.rollBack()
+		self.collection=iparse.collectors()
+		self.metricsHost,self.metricsPort=iparse.ametrics()
 		if self.rollBack:
 			self.base_version=iparse.base_version()
 			self.rollBack_service=iparse.rollBack_service()

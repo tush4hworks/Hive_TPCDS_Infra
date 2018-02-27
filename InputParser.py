@@ -1,5 +1,6 @@
 import sys
 import json
+from collections import defaultdict
 
 class parseInput:
 	def __init__(self,fileloc):
@@ -46,6 +47,15 @@ class parseInput:
 
 	def noteInfo(self):
 		return [self.params['wrap']['notebook']['host'],self.params['wrap']['notebook']['user'],self.params['wrap']['notebook']['password'],self.params['wrap']['notebook']['note'],self.params['wrap']['notebook']['zepInputFile']]
+
+	def collectors(self):
+		c=defaultdict(lambda:defaultdict(lambda:None))
+		for key in self.params['wrap']['ambariMetrics']['collector'].keys():
+			c[key].update(self.params['wrap']['ambariMetrics']['collector'][key])
+		return c
+
+	def ametrics(self):
+		return [self.params['wrap']['ambariMetrics']['metricsHost'],self.params['wrap']['ambariMetrics']['metricsPort']]
 
 
 
