@@ -18,10 +18,10 @@
       },
     "ambariMetrics":{
     "collector":{
-      "host":{"metrics":"mem_free._AVG,disk_free._AVG,cpu_system._AVG,cpu_user._AVG,bytes_in._AVG,bytes_out._AVG",
+      "host":{"metrics":"mem_free,disk_free,cpu_system,cpu_user,bytes_in,bytes_out",
               "hostname":"dphslave%",
               "appId":"HOST","dumpfile":"host_stats.csv"},
-      "service":{"metrics":"yarn.NodeManagerMetrics.ContainersRunning._AVG,yarn.QueueMetrics.Queue=root.AllocatedMB._AVG,yarn.QueueMetrics.Queue=root.AllocatedVCore._AVG"
+      "service":{"metrics":"yarn.NodeManagerMetrics.ContainersRunning._SUM,yarn.QueueMetrics.Queue=root.AllocatedMB._SUM,yarn.QueueMetrics.Queue=root.AllocatedVCore._SUM"
                 ,"dumpfile":"service_stats.csv"}
     },
       "metricsHost":"localhost",

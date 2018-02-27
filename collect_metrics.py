@@ -5,7 +5,6 @@ import json
 
 class getQueryMetrics:
 	def __init__(self,host,port):
-		self.query=query
 		self.prefix='http://{}:{}/ws/v1/timeline/metrics'.format(host,port)
 		self.host_stats=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:'NA')))
 		self.service_stats=defaultdict(lambda:defaultdict(lambda:'NA'))
@@ -22,10 +21,12 @@ class getQueryMetrics:
 	def addToMetrics(self,query,metricType,metricList):
 		if metricType=='host':
 			for stat in metricList:
-				self.host_stats[query][stat['hostname']][stat['metricname']]=stat['metrics'].values()[0]
+				if len(stat['metrics'].keys())>0:
+					self.host_stats[query][stat['hostname']][stat['metricname']]=str(int(sum(stat['metrics'].values())/len(stat['metrics'].keys())))
 		elif metricType=='service':
 			for stat in metricList:
-				self.service_stats[query][stat['metricname']]=stat['metrics'].values()[0]
+				if len(stat['metrics'].keys())>0:
+					self.service_stats[query][stat['metricname']]=str(int(sum(stat['metrics'].values())/len(stat['metrics'].keys())))
 
 	def dumptofile(self,query,metricType,dumpfile):
 		if metricType=='host':
