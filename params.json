@@ -19,8 +19,7 @@
     "ambariMetrics":{
     "collector":{
       "host":{"metrics":"mem_free,disk_free,cpu_system,cpu_user,bytes_in,bytes_out",
-              "hostname":"dphslave%",
-              "appId":"HOST","dumpfile":"host_stats.csv"},
+              "hostname":"dphslave%","dumpfile":"host_stats.csv"},
       "service":{"metrics":"yarn.NodeManagerMetrics.ContainersRunning._SUM,yarn.QueueMetrics.Queue=root.AllocatedMB._SUM,yarn.QueueMetrics.Queue=root.AllocatedVCore._SUM"
                 ,"dumpfile":"service_stats.csv"}
     },
