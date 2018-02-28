@@ -37,7 +37,7 @@ class getQueryMetrics:
 	def dumpServiceStats(self,query,dumpfile):
 		if len(self.service_stats[query].keys())>0:
 			with open(dumpfile,'a+') as f:
-				if not self.ifheader:
+				if not self.ifheaderservice:
 					f.write('query,'+','.join(sorted(self.service_stats[query].keys()))+'\n')
 					self.ifheader=True
 				f.write(','.join([query]+[str(self.service_stats[query][key]) for key in sorted(self.service_stats[query].keys())])+'\n')
