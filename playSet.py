@@ -183,12 +183,11 @@ class controls:
 
 	def statCollection(self,queryDict):
 		try:
-			t=threading.Thread(target=self.addResourceStats,args=[queryDict])
-			t.start()
+			threading.Thread(target=self.addResourceStats,args=[queryDict]).start()
 		except Exception as e:
 			self.logger.info(e.__str__())
 
-	def runTests(self,dbname,settings,hiveqls,numRuns,runZep=False):
+	def runTests(self,dbname,settings,hiveqls,numRuns):
 		"""Main entry function to run TPCDS suite"""
 		self.hive.setJDBCUrl(self.conn_str,dbname)
 		currSet=None
@@ -197,11 +196,9 @@ class controls:
 		'''
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
-				updateZeppelin=False
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
 				if not(currSet) or not(setting==currSet):
 					force_restart=False
-					updateZeppelin=True and runZep
 					if setting in self.hive.sysMod.keys():
 						self.sysConf(self.hive.sysMod[setting],setting)
 					if setting in self.hive.viaAmbari.keys():
@@ -227,7 +224,7 @@ class controls:
 					event.clear()
 					'''
 				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
-				if updateZeppelin:
+				if self.runZep:
 					self.updateNote()
 			except Exception as e:
 				#event.clear()
@@ -280,7 +277,7 @@ class controls:
 
 if __name__=='__main__':
 	C=controls('params.json')
-	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns,C.runZep)
+	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns)
 	C.dumpResultsToCsv()
 	C.statCollection(C.epochdict)
 	C.runAnalysis()
