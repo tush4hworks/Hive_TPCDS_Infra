@@ -32,6 +32,7 @@ class controls:
 		self.logger=logging.getLogger(__name__)
 		'''
 		self.stats=computeStats.statsPerQuery()
+
 		'''
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 		self.rowsOnQuery=defaultdict(lambda:'NA')
@@ -103,7 +104,7 @@ class controls:
 			self.logger.error(e)
 
 	def addResourceStats(self,queryDict):
-		cstat=collect_metrics.getQueryMetrics(self.metricsHost,self.metricsPort)
+		cstat=collect_metrics.getQueryMetrics(self.metricsHost,self.metricsPort,self.logger)
 		for query in queryDict.keys():
 			try:
 				self.logger.info('+ Collecting stats for query '+query)
