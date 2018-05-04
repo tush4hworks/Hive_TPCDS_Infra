@@ -284,6 +284,6 @@ if __name__=='__main__':
 	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns)
 	C.dumpResultsToCsv()
 	C.statCollection(C.epochdict)
-	C.sysConf(['zip *stats.csv stats_'+getDateTime()+'.zip'])
+	C.sysConf(['zip stats_'+getDateTime()+'.zip *stats.csv'])
 	C.runAnalysis()
 
