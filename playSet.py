@@ -37,7 +37,7 @@ class controls:
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 		self.rowsOnQuery=defaultdict(lambda:'NA')
 		self.start_end=defaultdict(lambda:['NA','NA'])
-		self.epochdict=defaultdict(lambda:['NA','NA'])
+		self.epochdict=defaultdict(lambda:defaultdict(lambda:['NA','NA']))
 		self.containers=defaultdict(lambda:defaultdict(lambda:0))
 		self.fetchParams(jsonFile)
 
@@ -105,14 +105,17 @@ class controls:
 
 	def addResourceStats(self,queryDict):
 		cstat=collect_metrics.getQueryMetrics(self.metricsHost,self.metricsPort,self.logger)
-		for query in queryDict.keys():
-			try:
-				self.logger.info('+ Collecting stats for query '+query)
-				for key in self.collection.keys():
-					cstat.fetch_stats(query,key,self.collection[key]['metrics'],queryDict[query][0],queryDict[query][1],self.collection[key]['dumpfile'],self.collection[key]['hostname'],self.collection[key]['precision'],self.collection[key]['appId'])
-				self.logger.info('- Collected stats for query '+query)
-			except Exception as e:
-				self.logger.info(e.__str__())	
+		for setting in queryDict.keys():
+			self.logger.info('+ Collecting stats for setting '+setting)
+			for query in queryDict[setting].keys():
+				try:
+					self.logger.info('+ Collecting stats for query '+query)
+					for key in self.collection.keys():
+						cstat.fetch_stats(query,key,self.collection[key]['metrics'],queryDict[query][0],queryDict[query][1],'_'.join([setting,self.collection[key]['dumpfile']]),self.collection[key]['hostname'],self.collection[key]['precision'],self.collection[key]['appId'])
+					self.logger.info('- Collected stats for query '+query)
+				except Exception as e:
+					self.logger.info(e.__str__())
+			self.logger.info('- Collected stats for setting '+setting)	
 
 	def runCmd(self,cmd,dbname,setting,hiveql,run):
 		"""Wrapper to run shell"""
@@ -127,18 +130,18 @@ class controls:
 				f.write(result)
 			self.logger.info('- Finished executing command '+cmd)
 			self.addResult(result,dbname,setting,hiveql,[start,end])
-			self.epochdict[hiveql]=[startEpoch,endEpoch]
+			self.epochdict[setting][hiveql]=[startEpoch,endEpoch]
 		except Exception as e:
 			end=self.getDateTime()
 			endEpoch=str(int(time.time()*1000))
-			self.epochdict[hiveql]=[startEpoch,endEpoch]
+			self.epochdict[setting][hiveql]=[startEpoch,endEpoch]
 			self.logger.error('- Finished executing command with exception '+cmd)
 			self.addResult('NA',dbname,setting,hiveql,[start,end])
 			if hasattr(e,'output'):
 				with open('History/'+'_'.join([dbname,hiveql,setting,run,self.getDateTime()]),'w+') as f:
 					f.write(e.output)
 
-	def sysConf(self,cmds,setting):
+	def sysConf(self,cmds,setting=''):
 		for cmd in cmds:
 			try:
 				self.logger.info('+ Running '+cmd+' for setting '+setting)
@@ -281,4 +284,6 @@ if __name__=='__main__':
 	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns)
 	C.dumpResultsToCsv()
 	C.statCollection(C.epochdict)
+	C.sysConf(['zip *stats.csv stats_'+getDateTime()+'.zip'])
 	C.runAnalysis()
+
