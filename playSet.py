@@ -111,7 +111,7 @@ class controls:
 				try:
 					self.logger.info('+ Collecting stats for query '+query)
 					for key in self.collection.keys():
-						cstat.fetch_stats(query,key,self.collection[key]['metrics'],queryDict[query][0],queryDict[query][1],'_'.join([setting,self.collection[key]['dumpfile']]),self.collection[key]['hostname'],self.collection[key]['precision'],self.collection[key]['appId'])
+						cstat.fetch_stats(query,key,self.collection[key]['metrics'],queryDict[setting][query][0],queryDict[setting][query][1],'_'.join([setting,self.collection[key]['dumpfile']]),self.collection[key]['hostname'],self.collection[key]['precision'],self.collection[key]['appId'])
 					self.logger.info('- Collected stats for query '+query)
 				except Exception as e:
 					self.logger.info(e.__str__())
