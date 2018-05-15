@@ -15,6 +15,7 @@ import datetime
 import time
 import computeStats
 import collect_metrics
+import partialStats
 
 
 class controls:
@@ -40,6 +41,7 @@ class controls:
 		self.epochdict=defaultdict(lambda:defaultdict(lambda:['NA','NA']))
 		self.containers=defaultdict(lambda:defaultdict(lambda:0))
 		self.fetchParams(jsonFile)
+		self.pstat=partialStats.pstats(self.logger)
 
 	def getDateTime(self,epochT=False):
 		if epochT:
@@ -193,7 +195,6 @@ class controls:
 
 	def runTests(self,dbname,settings,hiveqls,numRuns):
 		"""Main entry function to run TPCDS suite"""
-		self.hive.setJDBCUrl(self.conn_str,dbname)
 		currSet=None
 		'''
 		event=threading.Event()
@@ -261,6 +262,7 @@ class controls:
 		self.numRuns=iparse.numRuns()
 		self.conn_str=iparse.conn_str()
 		self.db=iparse.db()
+		self.hive.setJDBCUrl(self.conn_str,self.db)
 		self.queries=iparse.queries()
 		self.printer=iparse.printer()
 		self.rollBack=iparse.rollBack()
@@ -281,6 +283,7 @@ class controls:
 
 if __name__=='__main__':
 	C=controls('params.json')
+	C.pstat.performCheck(C.hive.hs2url,C.queryDir,C.queries)
 	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns)
 	C.dumpResultsToCsv()
 	C.statCollection(C.epochdict)
