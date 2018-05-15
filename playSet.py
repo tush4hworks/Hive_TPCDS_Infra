@@ -207,10 +207,10 @@ class controls:
 					if setting in self.hive.sysMod.keys():
 						self.sysConf(self.hive.sysMod[setting],setting)
 					if setting in self.hive.viaAmbari.keys():
-						if currSet and self.rollBack:
-							self.logger.warn('+ Rolling back to base version before making changes for setting '+currSet+ '+')
+						if self.rollBack:
+							self.logger.warn('+ Rolling back to base version +')
 							self.modconf.rollBackConfig(self.rollBack_service,self.base_version) 
-							self.logger.info('- Rolled back to base version before making changes for setting '+currSet+ '-')
+							self.logger.info('- Rolled back to base version before making changes for setting -')
 							force_restart=True
 						self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
 						self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'],force_restart)

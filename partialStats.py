@@ -2,13 +2,8 @@ import sys
 import commands
 import re
 
-
-TableScan=r'TableScan'
-statistics=r'Statistics'
-
-
 class pstats:
-	
+
 	def __init__(self,logger):
 		self.logger=logger
 
@@ -24,10 +19,10 @@ class pstats:
 		stats=True
 		line=out.split('\n')
 		for i in range(len(line)):
-			if re.search(TableScan,line[i],re.I):
+			if re.search(r'TableScan',line[i],re.I):
 				while True and i<len(out.split('\n')):
 					i=i+1
-					if re.search(statistics,line[i],re.I):
+					if re.search(r'Statistics',line[i],re.I):
 						if 'PARTIAL' in line[i].upper() or 'NONE' in line[i].upper():
 							return False
 						break
