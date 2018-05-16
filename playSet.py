@@ -210,7 +210,7 @@ class controls:
 						if self.rollBack:
 							self.logger.warn('+ Rolling back to base version +')
 							self.modconf.rollBackConfig(self.rollBack_service,self.base_version) 
-							self.logger.info('- Rolled back to base version before making changes for setting -')
+							self.logger.info('- Rolled back to base version before making changes -')
 							force_restart=True
 						self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
 						self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'],force_restart)
@@ -256,9 +256,9 @@ class controls:
 		iparse=InputParser.parseInput(fileloc)
 		host,clustername,user,password=iparse.clusterInfo()
 		self.modconf=modifyConfig.ambariConfig(host,clustername,user,password)
-		queryDir,initDir=iparse.hiveDirs()
+		self.queryDir,initDir=iparse.hiveDirs()
 		self.hiveconfs=[]
-		self.hive=hiveUtil.hiveUtil(queryDir,initDir)
+		self.hive=hiveUtil.hiveUtil(self.queryDir,initDir)
 		self.numRuns=iparse.numRuns()
 		self.conn_str=iparse.conn_str()
 		self.db=iparse.db()

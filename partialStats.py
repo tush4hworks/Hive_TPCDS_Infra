@@ -20,7 +20,7 @@ class pstats:
 		line=out.split('\n')
 		for i in range(len(line)):
 			if re.search(r'TableScan',line[i],re.I):
-				while True and i<len(out.split('\n')):
+				while True and i<len(out.split('\n'))-1:
 					i=i+1
 					if re.search(r'Statistics',line[i],re.I):
 						if 'PARTIAL' in line[i].upper() or 'NONE' in line[i].upper():
