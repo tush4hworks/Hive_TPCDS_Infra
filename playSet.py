@@ -13,7 +13,6 @@ import InputParser
 import notes
 import datetime
 import time
-import computeStats
 import collect_metrics
 import partialStats
 
@@ -31,10 +30,6 @@ class controls:
 		logging.basicConfig(format=FORMAT,filename='hivetests.log',filemode='w',level='INFO')
 		logging.getLogger("requests").setLevel(logging.WARNING)
 		self.logger=logging.getLogger(__name__)
-		'''
-		self.stats=computeStats.statsPerQuery()
-
-		'''
 		self.results=defaultdict(lambda:defaultdict(lambda:defaultdict(lambda:[])))
 		self.rowsOnQuery=defaultdict(lambda:'NA')
 		self.start_end=defaultdict(lambda:['NA','NA'])
@@ -169,16 +164,6 @@ class controls:
 				self.modconf.restartComponent(component)
 				self.logger.info('- Restarted '+component+' -')
 
-	'''
-	def collectStats(self,event,query,setting):
-		containers=0
-		event.wait()
-		while event.isSet():
-			containers=max(self.stats.get_num_containers(),containers)
-			time.sleep(1)
-		self.containers[query][setting]=containers
-	'''
-
 
 	def updateNote(self):
 		try:
@@ -196,9 +181,6 @@ class controls:
 	def runTests(self,dbname,settings,hiveqls,numRuns):
 		"""Main entry function to run TPCDS suite"""
 		currSet=None
-		'''
-		event=threading.Event()
-		'''
 		for setting,hiveql in list(itertools.product(settings,hiveqls)):
 			try:
 				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
@@ -220,19 +202,11 @@ class controls:
 					currSet=setting
 				beelineCmd=self.hive.BeelineCommand(setting,hiveql,True if setting in self.hive.initFile.keys() else False)
 				for i in xrange(numRuns):
-					'''
-					threading.Thread(target=self.collectStats,args=[event,hiveql,setting]).start() 
-					event.set()
-					'''
 					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
-					'''
-					event.clear()
-					'''
 				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
 				if self.runZep:
 					self.updateNote()
 			except Exception as e:
-				#event.clear()
 				self.logger.error(e.__str__())
 				self.logger.warn('- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -')
 
