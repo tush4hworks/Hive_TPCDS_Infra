@@ -15,6 +15,7 @@ import datetime
 import time
 import collect_metrics
 import partialStats
+import initialize
 
 
 class controls:
@@ -24,7 +25,7 @@ class controls:
 	dag_regex=r'100%\s+ELAPSED TIME:\s+\d+.\d+\s+s'
 	numrows_regex=r'selected'
 	
-	def __init__(self,jsonFile):
+	def __init__(self):
 		"""Init Function for class controls"""
 		FORMAT = '%(asctime)-s-%(levelname)s-%(message)s'
 		logging.basicConfig(format=FORMAT,filename='hivetests.log',filemode='w',level='INFO')
@@ -35,8 +36,8 @@ class controls:
 		self.start_end=defaultdict(lambda:['NA','NA'])
 		self.epochdict=defaultdict(lambda:defaultdict(lambda:['NA','NA']))
 		self.containers=defaultdict(lambda:defaultdict(lambda:0))
-		self.fetchParams(jsonFile)
 		self.pstat=partialStats.pstats(self.logger)
+		self.initializer=initialize.initialize(self.logger)
 
 	def getDateTime(self,epochT=False):
 		if epochT:
@@ -84,8 +85,7 @@ class controls:
 		except Exception as e:
 			self.logger.info(e.__str__())
 		try:
-			self.zepObj.zepLogin()
-			self.zepObj.runParagraphs(self.zeppelinNote)
+			self.zepObj.runParagraphs()
 		except Exception as e:
 			self.logger.info(e.__str__())
 	
@@ -164,7 +164,6 @@ class controls:
 				self.modconf.restartComponent(component)
 				self.logger.info('- Restarted '+component+' -')
 
-
 	def updateNote(self):
 		try:
 			t=threading.Thread(target=self.toZeppelinAndTrigger,args=())
@@ -174,42 +173,80 @@ class controls:
 
 	def statCollection(self,queryDict):
 		try:
-			threading.Thread(target=self.addResourceStats,args=[queryDict]).start()
+			threading.Thread(target=self.addResourceStats,args=[self.epochdict]).start()
 		except Exception as e:
 			self.logger.info(e.__str__())
 
-	def runTests(self,dbname,settings,hiveqls,numRuns):
+	def adjustConf(self,setting):
+		self.logger.info('+ Adjusting configurations')
+		force_restart=False
+		if setting in self.hive.sysMod.keys():
+			self.sysConf(self.hive.sysMod[setting],setting)
+		if setting in self.hive.viaAmbari.keys():
+			if self.rollBack:
+				self.logger.warn('+ Rolling back to base version +')
+				self.modconf.rollBackConfig(self.rollBack_service,self.base_version) 
+				self.logger.info('- Rolled back to base version before making changes -')
+				force_restart=True
+			self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
+			self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'],force_restart)
+		self.logger.info('+ Starting execution with below configurations for '+setting)
+		for toPrint in self.printer:
+			self.logger.info(json.dumps(self.modconf.getConfig(toPrint),indent=4,sort_keys=True))
+		self.logger.info('- Adjusted configurations -')
+
+
+	def runTests(self):
 		"""Main entry function to run TPCDS suite"""
-		currSet=None
-		for setting,hiveql in list(itertools.product(settings,hiveqls)):
+		#for setting,hiveql in list(itertools.product(settings,hiveqls)):
+		for setting in self.hiveconfs:
 			try:
-				self.logger.info('+ BEGIN EXECUTION '+' '.join([hiveql,dbname,setting])+' +')
-				if not(currSet) or not(setting==currSet):
-					force_restart=False
-					if setting in self.hive.sysMod.keys():
-						self.sysConf(self.hive.sysMod[setting],setting)
-					if setting in self.hive.viaAmbari.keys():
-						if self.rollBack:
-							self.logger.warn('+ Rolling back to base version +')
-							self.modconf.rollBackConfig(self.rollBack_service,self.base_version) 
-							self.logger.info('- Rolled back to base version before making changes -')
-							force_restart=True
-						self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')
-						self.modifySettingsAndRestart(self.hive.viaAmbari[setting],self.hive.restarts[setting]['services'],self.hive.restarts[setting]['components'],force_restart)
-					self.logger.info('Starting execution with below configurations for '+setting)
-					for toPrint in self.printer:
-						self.logger.info(json.dumps(self.modconf.getConfig(toPrint),indent=4,sort_keys=True))
-					currSet=setting
-				beelineCmd=self.hive.BeelineCommand(setting,hiveql,True if setting in self.hive.initFile.keys() else False)
-				for i in xrange(numRuns):
-					self.runCmd(beelineCmd,dbname,setting,hiveql,str(i))
-				self.logger.info('- FINISHED EXECUTION '+' '.join([hiveql,dbname,setting])+' -')
-				if self.runZep:
-					self.updateNote()
+				self.adjustConf(setting)
 			except Exception as e:
 				self.logger.error(e.__str__())
-				self.logger.warn('- FINISHED EXECUTION WITH EXCEPTION'+' '.join([hiveql,dbname,setting])+' -')
+				self.logger.error('- Skipping '+setting)
+				continue
+			self.tasks=list(self.queries)
+			runners=[]
+			for num_thread in range(self.num_threads):
+				runners.append(threading.Thread(target=self.pRunner,args=(setting,str(num_thread),int(time.time()))))
+			for runner in runners:
+				runner.start()
+			for runner in runners:
+				runner.join()
 
+	def runBeeline(self,setting,hiveql):
+		try:
+			self.logger.info('+ Begin executiom '+' '.join([hiveql,C.db,setting])+' +')
+			beelineCmd=self.hive.BeelineCommand(setting,hiveql,True if setting in self.hive.initFile.keys() else False)
+			for i in xrange(self.numRuns):
+				self.runCmd(beelineCmd,self.db,setting,hiveql,str(i))
+			self.logger.info('- Finished execution '+' '.join([hiveql,self.db,setting])+' -')
+			if self.runZep:
+				self.updateNote()
+		except Exception as e:
+			self.logger.error(e.__str__())
+			self.logger.warn('- Finished execution with exception'+' '.join([hiveql,self.db,setting])+' -')
+
+	def pRunner(self,setting,runner_id,start_time):
+		self.logger.info('+ Started runner '+runner_id)
+		currCount=0
+		while True:
+			if self.timeout and int(time.time())-start_time>self.timeout:
+				self.logger.warn('- Runner '+runner_id+' exceeded timeout, hence quitting! Ran a total of '+str(currCount)+' queries')
+				return
+			try:
+				hiveql=self.tasks.pop()
+				self.logger.info('+ Runner '+runner_id+' is running '+hiveql)
+				self.runBeeline(setting,hiveql)
+				currCount=currCount+1
+			except IndexError:
+				self.logger.warn('- Runner '+runner_id+' exiting! No queries left to run. Ran a total of '+str(currCount)+' queries')
+				return
+			except Exception:
+				self.logger.error('- Runner '+runner_id+' exited with exception '+e.__str__())
+				self.logger.info('- Runner '+runner_id+' ran a total of '+str(currCount)+' queries')
+				return
 
 	def addHiveSettings(self,name,runSettings):
 		"""Segregate settings and add"""
@@ -235,6 +272,7 @@ class controls:
 		self.hive=hiveUtil.hiveUtil(self.queryDir,initDir)
 		self.numRuns=iparse.numRuns()
 		self.conn_str=iparse.conn_str()
+		self.num_threads,self.timeout=iparse.runConf()
 		self.db=iparse.db()
 		self.hive.setJDBCUrl(self.conn_str,self.db)
 		self.queries=iparse.queries()
@@ -249,18 +287,22 @@ class controls:
 			self.addHiveSettings(setting['name'],setting['config'])
 		self.runZep=False
 		if iparse.whetherZeppelin():
-			self.runZep=True
-			host,user,password,note,zepInputFile=iparse.noteInfo()
-			self.zeppelinNote=note
-			self.zepInputFile=zepInputFile
-			self.zepObj=notes.zepInt(host,user,password)
+			try:
+				self.runZep=True
+				host,user,password=iparse.noteInfo()
+				self.zepInputFile='zepin.csv'
+				self.zepObj=notes.zepInt(host,user,password)
+				self.zepObj.createNote(self.db,[setting['name'] for setting in iparse.specified_settings()])
+			except Exception as e:
+				print 'Problems in creating zeppelin notebook. '+e.__str__()
 
 if __name__=='__main__':
-	C=controls('params.json')
+	C=controls()
+	C.fetchParams(C.initializer.begin())
 	C.pstat.performCheck(C.hive.hs2url,C.queryDir,C.queries)
-	C.runTests(C.db,C.hiveconfs,C.queries,C.numRuns)
+	C.runTests()
 	C.dumpResultsToCsv()
-	C.statCollection(C.epochdict)
+	C.statCollection()
 	C.sysConf(['zip stats_'+C.getDateTime()+'.zip *stats.csv'])
 	C.runAnalysis()
 

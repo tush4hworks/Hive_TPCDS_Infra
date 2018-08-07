@@ -1,0 +1,20 @@
+2018-07-30 22:36:40,350-INFO-+ Adjusting configurations
+2018-07-30 22:36:40,350-INFO-+ Started runner 0
+2018-07-30 22:36:40,351-INFO-+ Runner 0 is running query5.sql
+2018-07-30 22:36:40,351-INFO-+ Started runner 1
+2018-07-30 22:36:40,351-INFO-+ Runner 1 is running query4.sql
+2018-07-30 22:36:40,351-INFO-+ Started runner 2
+2018-07-30 22:36:40,352-INFO-+ Runner 2 is running query3.sql
+2018-07-30 22:37:00,354-WARNING-- Runner 0 exceeded timeout, hence quitting! Ran a total of 1 queries
+2018-07-30 22:37:00,354-WARNING-- Runner 1 exceeded timeout, hence quitting! Ran a total of 1 queries
+2018-07-30 22:37:00,354-WARNING-- Runner 2 exceeded timeout, hence quitting! Ran a total of 1 queries
+2018-07-30 22:37:00,355-INFO-+ Adjusting configurations
+2018-07-30 22:37:00,355-INFO-+ Started runner 0
+2018-07-30 22:37:00,355-INFO-+ Runner 0 is running query5.sql
+2018-07-30 22:37:00,356-INFO-+ Started runner 1
+2018-07-30 22:37:00,356-INFO-+ Runner 1 is running query4.sql
+2018-07-30 22:37:00,356-INFO-+ Started runner 2
+2018-07-30 22:37:00,357-INFO-+ Runner 2 is running query3.sql
+2018-07-30 22:37:20,361-WARNING-- Runner 0 exceeded timeout, hence quitting! Ran a total of 1 queries
+2018-07-30 22:37:20,361-WARNING-- Runner 1 exceeded timeout, hence quitting! Ran a total of 1 queries
+2018-07-30 22:37:20,361-WARNING-- Runner 2 exceeded timeout, hence quitting! Ran a total of 1 queries

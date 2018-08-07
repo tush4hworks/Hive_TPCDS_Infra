@@ -55,6 +55,9 @@ class ambariConfig:
 			except KeyError:
 				print 'Desired Config does not exist!. Please check config name.'
 
+	def getHostsRunningComponent(self,component):
+		return ([item['HostRoles']['host_name'] for item in json.loads(self.commonGet(self.prefix+'/host_components?HostRoles/component_name='+component))['items']])
+
 	def rollBackConfig(self,service,version):
 		roll_payload={
 		  'Clusters': {
@@ -126,16 +129,10 @@ class ambariConfig:
 
 if __name__=='__main__':
 	'''
-	s=ambariConfig('localhost','DPH')
-	s.printConfig('hive-interactive-env')
-	s.printConfig('tez-interactive-site')
-	s.putConfig('hive-interactive-site',{'hive.tez.container.size':'6144'})
-	s.putConfig('tez-interactive-site',{'tez.runtime.io.sort.mb':'1200'})
-	s.printConfig('hive-interactive-site')
-	s.printConfig('tez-interactive-site')
-	s.restartComponent('HIVE/components/HIVE_SERVER_INTERACTIVE')
-	'''
+	s=ambariConfig('AMBARI_IP','CLUSTER','admin','admin')
+	s.printConfig('hive-site')	
 	pass
+	'''
 	
 
 

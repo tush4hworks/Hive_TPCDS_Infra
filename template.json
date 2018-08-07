@@ -1,0 +1,38 @@
+{
+  "wrap": {
+    "cluster":{
+      "host":"172.17.16.111",
+      "clustername":"HW_HWX",
+      "user":"admin",
+      "password":"admin",
+      "queryDir":"/home/hdfs/hive-testbench/sample-queries-tpcds",
+      "initDir":"/home/hdfs/llap/TandE/llap_settings"
+      },
+    "zeppelin":"true",
+    "notebook":{
+      "host":"localhost:9995",
+      "user":"user1",
+      "password":"user1"
+      },
+    "ambariMetrics":{
+    "collector":{
+      "host":{"metrics":"mem_free,disk_free,cpu_system,cpu_user,bytes_in,bytes_out,yarn.NodeManagerMetrics.ContainersRunning,yarn.QueueMetrics.Queue=root.AllocatedMB,yarn.QueueMetrics.Queue=root.AllocatedVCore",
+              "hostname":"dphslave%","dumpfile":"host_stats.csv"},
+      "service":{"metrics":"yarn.NodeManagerMetrics.ContainersRunning._SUM,yarn.QueueMetrics.Queue=root.AllocatedMB._SUM,yarn.QueueMetrics.Queue=root.AllocatedVCore._SUM"
+                ,"dumpfile":"service_stats.csv"}
+    },
+      "metricsHost":"localhost",
+      "metricsPort":"6188"
+    },
+    "numRuns": 1,
+    "runConf":{"num_sessions":1},
+    "database": "tpcds_bin_partitioned_orc_100",
+    "printer":["hive-interactive-site","tez-interactive-site","hive-interactive-env"],
+    "enableRollBack":"true",
+    "rollBackService":"HIVE",
+    "base_version":151,
+    "queries":["query12.sql","query13.sql"],
+    "connection_url":"jdbc:hive2://c01s03.hadoop.local:2181,c01s02.hadoop.local:2181,c01s01.hadoop.local:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2-hive2",
+    "settings":[]
+  }
+}

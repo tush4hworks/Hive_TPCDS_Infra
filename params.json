@@ -8,13 +8,11 @@
       "queryDir":"/home/hdfs/hive-testbench/sample-queries-tpcds",
       "initDir":"/home/hdfs/llap/TandE/llap_settings"
       },
-    "zeppelin":"true",
+    "zeppelin":"false",
     "notebook":{
       "host":"localhost:9995",
       "user":"user1",
-      "password":"user1",
-      "note":"300GBSparkSql",
-      "zepInputFile":"zepin.csv"
+      "password":"user1"
       },
     "ambariMetrics":{
     "collector":{
@@ -27,12 +25,13 @@
       "metricsPort":"6188"
     },
     "numRuns": 1,
+    "runConf":{"num_sessions":3,"timeout":10},
     "database": "tpcds_bin_partitioned_orc_100",
     "printer":["hive-interactive-site","tez-interactive-site","hive-interactive-env"],
     "enableRollBack":"true",
     "rollBackService":"HIVE",
     "base_version":151,
-    "queries":["query12.sql","query13.sql"],
+    "queries":["query12.sql","query13.sql","query14.sql","query1.sql","query2.sql","query3.sql","query4.sql","query5.sql"],
     "connection_url":"jdbc:hive2://c01s03.hadoop.local:2181,c01s02.hadoop.local:2181,c01s01.hadoop.local:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2-hive2",
     "settings": [
       {
