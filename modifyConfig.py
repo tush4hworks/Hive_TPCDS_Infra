@@ -33,6 +33,10 @@ class ambariConfig:
 		resp=requests.put(url,headers=self.headers,auth=self.auth,data=data)
 		return resp.content
 
+	def commonPost(self,url,data):
+		resp=requests.put(url,headers=self.headers,auth=self.auth,data=data)
+		return resp.content
+
 	def printConfig(self,config):
 		confs=self.commonGet(self.prefix+'?fields=Clusters/desired_configs')
 		if confs:
@@ -112,7 +116,7 @@ class ambariConfig:
 		    }
 		  ]
 		}
-		req_href=json.loads(self.commonPut(self.prefix+'/requests',json.dumps(restart_all_payload)))['href']
+		req_href=json.loads(self.commonPost(self.prefix+'/requests',json.dumps(restart_all_payload)))['href']
 		while not (json.loads(self.commonGet(req_href))['Requests']['request_status']=='COMPLETED'):
 			time.sleep(5)
 		#Giving Buffer

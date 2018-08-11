@@ -287,7 +287,6 @@ class controls:
 		self.collection=iparse.collectors()
 		self.metricsHost,self.metricsPort=iparse.ametrics()
 		if self.rollBack:
-			self.base_version=iparse.base_version()
 			self.rollBack_service=iparse.rollBack_service()
 		for setting in iparse.specified_settings():
 			self.addHiveSettings(setting['name'],setting['config'])
