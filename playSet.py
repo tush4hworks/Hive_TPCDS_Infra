@@ -156,6 +156,11 @@ class controls:
 		if reset or force_restart:
 			self.logger.warn('+ Config changed. Going to restart services/components if any! +')
 			for service in services:
+				if service=="ALL":
+					self.logger.info('+ Restarting all stale components')
+					self.modconf.restartAllRequired()
+					self.logger.info('- Restarted all stale components')
+					break
 				self.logger.info('+ Restarting '+service+' +')
 				self.modconf.restartService(service)
 				self.logger.info('- Restarted '+service+' -')
@@ -185,7 +190,8 @@ class controls:
 		if setting in self.hive.viaAmbari.keys():
 			if self.rollBack:
 				self.logger.warn('+ Rolling back to base version +')
-				self.modconf.rollBackConfig(self.rollBack_service,self.base_version) 
+				for rollserv in self.rollBack_service:
+					self.modconf.rollBackConfig(rollserv,self.rollBack_service[rollserv]) 
 				self.logger.info('- Rolled back to base version before making changes -')
 				force_restart=True
 			self.logger.info('+ Comparing with existing configurations via ambari for '+setting+' +')

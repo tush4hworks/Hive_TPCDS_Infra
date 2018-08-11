@@ -63,7 +63,7 @@ class tezseed:
 	          "restart": {
 	            "components": [
 	            ],
-	            "services": ["HIVE"]
+	            "services": ["ALL"]
 	          }
 	        },
 	        "name":None
@@ -81,8 +81,8 @@ class tezseed:
 			print "Can not get value for {} in {} because {}. Please try manual add".format(prop,conf,e.__str__())
 
 	def validConf(self,num_containers,container_mem,max_containers_per_nm):
-		if container_mem<4 or container_mem>12 or num_containers>max_containers_per_nm or num_containers<2:
-			return False
+		if container_mem<4 or container_mem>12 or num_containers<2:
+			return False 
 		return True
 		
 	def getCoresForExecutor(self,num_containers,container_mem,cores_per_nm):
@@ -114,11 +114,11 @@ class tezseed:
 		while count<self.startwith:
 			for num_containers,container_mem in self.twoproduct(self.getFactors(mem_per_nm)):
 				if self.validConf(num_containers,container_mem,max_containers_per_nm):
-					self.addConfToObj(container_mem,self.getCoresForExecutor(num_containers,container_mem,max_containers_per_nm))
+					self.addConfToObj(container_mem,self.getCoresForExecutor(min(num_containers,max_containers_per_nm),container_mem,max_containers_per_nm))
 					count+=1
 				if not(num_containers==container_mem):
 					if self.validConf(container_mem,num_containers,max_containers_per_nm):
-						self.addConfToObj(num_containers,self.getCoresForExecutor(container_mem,num_containers,max_containers_per_nm))
+						self.addConfToObj(num_containers,self.getCoresForExecutor(min(container_mem,max_containers_per_nm),num_containers,max_containers_per_nm))
 						count+=1
 			mem_per_nm=mem_per_nm-1
 
@@ -131,5 +131,4 @@ class tezseed:
 
 	def twoproduct(self,factors):
 		return [[factors[i],factors[len(factors)-1-i]] for i in range((len(factors)/2)+len(factors)%2)]
-
 

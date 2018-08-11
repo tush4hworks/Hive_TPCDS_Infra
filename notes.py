@@ -1,4 +1,4 @@
-iimport sys
+import sys
 import requests
 import json
 import random

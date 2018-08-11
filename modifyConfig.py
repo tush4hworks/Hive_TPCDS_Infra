@@ -99,6 +99,25 @@ class ambariConfig:
 		#Giving Buffer
 		time.sleep(60)
 
+	def restartAllRequired(self):
+		restart_all_payload={
+		  "RequestInfo": {
+		    "context": "Restart stale",
+		    "operational_level": "host_component",
+		    "command": "RESTART"
+		  },
+		  "Requests/resource_filters": [
+		    {
+		      "hosts_predicate": "HostRoles/stale_configs=true"
+		    }
+		  ]
+		}
+		req_href=json.loads(self.commonPut(self.prefix+'/requests',json.dumps(restart_all_payload)))['href']
+		while not (json.loads(self.commonGet(req_href))['Requests']['request_status']=='COMPLETED'):
+			time.sleep(5)
+		#Giving Buffer
+		time.sleep(60)
+
 	def restartComponent(self,comp):
 		self.stopComponent(comp)
 		self.startComponent(comp)
