@@ -176,7 +176,7 @@ class controls:
 		except Exception as e:
 			self.logger.info(e.__str__())
 
-	def statCollection(self,queryDict):
+	def statCollection(self):
 		try:
 			threading.Thread(target=self.addResourceStats,args=[self.epochdict]).start()
 		except Exception as e:
