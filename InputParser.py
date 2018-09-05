@@ -18,6 +18,9 @@ class parseInput:
 	def db(self):
 		return self.params['wrap']['database']
 
+	def runConf(self):
+		return [self.params['wrap']['runConf']['num_sessions'],self.params['wrap']['runConf']['timeout'] if 'timeout' in self.params['wrap']['runConf'].keys() else None]
+
 	def printer(self):
 		return self.params['wrap']['printer']
 
@@ -46,7 +49,7 @@ class parseInput:
 		return (self.params['wrap']['zeppelin'].lower()=='true')
 
 	def noteInfo(self):
-		return [self.params['wrap']['notebook']['host'],self.params['wrap']['notebook']['user'],self.params['wrap']['notebook']['password'],self.params['wrap']['notebook']['note'],self.params['wrap']['notebook']['zepInputFile']]
+		return [self.params['wrap']['notebook']['host'],self.params['wrap']['notebook']['user'],self.params['wrap']['notebook']['password']]
 
 	def collectors(self):
 		c=defaultdict(lambda:defaultdict(lambda:None))

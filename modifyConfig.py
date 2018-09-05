@@ -33,6 +33,10 @@ class ambariConfig:
 		resp=requests.put(url,headers=self.headers,auth=self.auth,data=data)
 		return resp.content
 
+	def commonPost(self,url,data):
+		resp=requests.put(url,headers=self.headers,auth=self.auth,data=data)
+		return resp.content
+
 	def printConfig(self,config):
 		confs=self.commonGet(self.prefix+'?fields=Clusters/desired_configs')
 		if confs:
@@ -54,6 +58,9 @@ class ambariConfig:
 					return json.loads(service_conf)['items'][0]['properties']
 			except KeyError:
 				print 'Desired Config does not exist!. Please check config name.'
+
+	def getHostsRunningComponent(self,component):
+		return ([item['HostRoles']['host_name'] for item in json.loads(self.commonGet(self.prefix+'/host_components?HostRoles/component_name='+component))['items']])
 
 	def rollBackConfig(self,service,version):
 		roll_payload={
@@ -96,6 +103,25 @@ class ambariConfig:
 		#Giving Buffer
 		time.sleep(60)
 
+	def restartAllRequired(self):
+		restart_all_payload={
+		  "RequestInfo": {
+		    "context": "Restart stale",
+		    "operational_level": "host_component",
+		    "command": "RESTART"
+		  },
+		  "Requests/resource_filters": [
+		    {
+		      "hosts_predicate": "HostRoles/stale_configs=true"
+		    }
+		  ]
+		}
+		req_href=json.loads(self.commonPost(self.prefix+'/requests',json.dumps(restart_all_payload)))['href']
+		while not (json.loads(self.commonGet(req_href))['Requests']['request_status']=='COMPLETED'):
+			time.sleep(5)
+		#Giving Buffer
+		time.sleep(60)
+
 	def restartComponent(self,comp):
 		self.stopComponent(comp)
 		self.startComponent(comp)
@@ -126,16 +152,10 @@ class ambariConfig:
 
 if __name__=='__main__':
 	'''
-	s=ambariConfig('localhost','DPH')
-	s.printConfig('hive-interactive-env')
-	s.printConfig('tez-interactive-site')
-	s.putConfig('hive-interactive-site',{'hive.tez.container.size':'6144'})
-	s.putConfig('tez-interactive-site',{'tez.runtime.io.sort.mb':'1200'})
-	s.printConfig('hive-interactive-site')
-	s.printConfig('tez-interactive-site')
-	s.restartComponent('HIVE/components/HIVE_SERVER_INTERACTIVE')
-	'''
+	s=ambariConfig('AMBARI_IP','CLUSTER','admin','admin')
+	s.printConfig('hive-site')	
 	pass
+	'''
 	
 
 
