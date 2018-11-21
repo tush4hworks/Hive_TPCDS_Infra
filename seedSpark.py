@@ -68,7 +68,7 @@ class sparkseed:
 
 	def getCoresForExecutor(self,num_executors,executor_mem,cores_per_nm):
 		max_executor_cores=int(math.floor(cores_per_nm/num_executors))
-		while not(float(executor_mem/max_executor_cores)>3.5) and not(max_executor_cores==1):
+		while not(float(executor_mem/max_executor_cores)>2.5) and not(max_executor_cores==1):
 			max_executor_cores=max_executor_cores-1
 		return max_executor_cores
 

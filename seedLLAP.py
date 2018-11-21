@@ -96,7 +96,7 @@ class llapseed:
 		for tradeoff in self.tradeoffs:
 			llap_heap_size=int(math.floor((daemon_memory*0.97)/(1.1+tradeoff)))
 			llap_cache_size=int(llap_heap_size*tradeoff)
-			llap_threadpool_size=min(self.store["yarn.nodemanager.resource.cpu-vcores"],20)
+			llap_threadpool_size=min(self.store["yarn.nodemanager.resource.cpu-vcores"])
 			container_sizes={
 			2048:{
 			"tez.runtime.io.sort.mb":"550",
@@ -105,7 +105,7 @@ class llapseed:
 			},
 			3072:{
 			"tez.runtime.io.sort.mb":"800",
-			"hive.tez.container.size":"2048",
+			"hive.tez.container.size":"3072",
 			"hive.auto.convert.join.noconditionaltask.size":"900000000"
 			},
 			4096:{
